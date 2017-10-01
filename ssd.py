@@ -11,12 +11,12 @@ def setConvWeights(lv: mx.gluon.nn.Conv2D, rv: mx.gluon.nn.Conv2D):
     lv.weight.set_data(rv.weight.data())
     lv.bias.set_data(rv.bias.data())
 
-class SSD(mx.gluon.Block):
+class SSDFeatures(mx.gluon.Block):
     """
     SSD: Single Shot Detector block
     """
     def __init__(self, **kwargs):
-        super(SSD, self).__init__(**kwargs)
+        super(SSDFeatures, self).__init__(**kwargs)
         self.conv1_1 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
         self.conv1_2 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
         self.pool1 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), stride=(2,2), padding=0, ceil_mode=False)
@@ -102,4 +102,15 @@ class SSD(mx.gluon.Block):
         features.append(f)
 
         return features
-        # do something
+
+
+class DetectorHead(mx.gluon.Block):
+    def __init__(self, num_cls, **kwargs):
+        super(DetectorHead, self).__init__(**kwargs)
+        self.conv_cls = mx.gluon.nn.Conv2D(channels=num_cls, kernel_size=(3, 3),padding=(1, 1))
+        self.conv_reg = mx.gluon.nn.Conv2D(channels=4, kernel_size=(3,3), padding=(1, 1))
+    
+    def forward(self, feature, *args):
+        f_cls = self.conv_cls(feature)
+        f_reg = self.conv_reg(feature)
+        return f_cls, f_reg

@@ -12,7 +12,7 @@ class VOCDataset(mx.gluon.data.Dataset):
     """
     Wrapper of HICO Dataset in json file.
     """
-    voc_class_name = ['person', 'bird', 'cat', 'cow', 'dog', 
+    voc_class_name = ['__background__', 'person', 'bird', 'cat', 'cow', 'dog', 
                       'horse', 'sheep', 'aeroplane', 'bicycle', 'boat', 
                       'bus', 'car', 'motorbike', 'train', 'bottle', 
                       'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor']
@@ -38,7 +38,7 @@ class VOCDataset(mx.gluon.data.Dataset):
         img_path = os.path.join(self.img_dir, idx+'.jpg')
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.transpose(img, (2, 0, 1))
+        img = np.transexpressionpose(img, (2, 0, 1))
 
         anno_path = os.path.join(self.annotation_dir, idx+'.xml')
         gt = self.convert_gt_into_array(parseFile(anno_path))
@@ -66,3 +66,30 @@ class VOCDataset(mx.gluon.data.Dataset):
             new_array.append(self.class_to_id[obj['name']])
             ret.append(new_array)
         return np.asarray(ret, dtype=np.float32)
+
+
+def random_flip(data, label):
+    if np.random.uniform() > 0.5:
+        c, h, w = data.shape
+        data = np.flip(data, axis=2)
+        label[:, 0] = w - label[:, 0]
+        label[:, 2] = w - label[:, 2]
+    return data, label
+
+
+def imagenetNormalize(img):
+    mean = mx.nd.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
+    std = mx.nd.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
+    img = mx.nd.array(img / 255)
+    img = mx.image.color_normalize(img, mean, std)
+    return img
+
+
+def show_images(data, label, ds:VOCDataset):
+    img = np.transpose(data, (1, 2, 0))
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    for item in label:
+        cv2.rectangle(img, (int(item[0]), int(item[1])), (int(item[2]), int(item[3])), color=(255, 0, 0), thickness=2)
+        cv2.putText(img, ds.voc_class_name[int(item[4])], (int(item[0]), int(item[3])),0, 0.5,(0, 255, 0))
+    cv2.imshow("Img", img)
+    cv2.waitKey(0)
