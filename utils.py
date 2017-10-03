@@ -2,6 +2,9 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import mxnet as mx
+from config import cfg
+import numpy as np 
+import cv2
 
 
 def bbox_transform(anchor, bbox):
@@ -47,3 +50,37 @@ def bbox_inverse_transform(anchor, bbox):
                 g_y1.reshape((-1, 1)), 
                 g_x2.reshape((-1, 1)), 
                 g_y2.reshape((-1, 1))], axis=1)
+
+
+def random_flip(data, label):
+    if np.random.uniform() > 0.5:
+        c, h, w = data.shape
+        data = np.flip(data, axis=2)
+        label[:, 0] = w - label[:, 0]
+        label[:, 2] = w - label[:, 2]
+    return data, label
+
+
+def imagenetNormalize(img):
+    mean = mx.nd.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
+    std = mx.nd.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
+    img = mx.nd.array(img / 255)
+    img = mx.image.color_normalize(img, mean, std)
+    return img
+
+
+def img_resize(img):
+    h, w, c = img.shape
+    if h > w:
+        # align width to cfg.short_size
+        scale = cfg.resize_short_size / w
+        nw = int(w * scale)
+        nh = int(h * scale)
+        img = cv2.resize(img, (nw, nh))
+    else:
+        # align height to cfg.short_size
+        scale = cfg.resize_short_size / h
+        nw = int(w * scale)
+        nh = int(h * scale)
+        img = cv2.resize(img, (nw, nh))
+    return img, scale

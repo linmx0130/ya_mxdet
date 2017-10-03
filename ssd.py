@@ -17,36 +17,34 @@ class SSDFeatures(mx.gluon.Block):
     """
     def __init__(self, **kwargs):
         super(SSDFeatures, self).__init__(**kwargs)
-        self.conv1_1 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv1_2 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.pool1 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), stride=(2,2), padding=0, ceil_mode=False)
+        self.conv1_1 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=3, activation='relu')
+        self.conv1_2 = mx.gluon.nn.Conv2D(channels=64, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=64, activation='relu')
+        self.pool1 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), strides=(2,2), padding=0, ceil_mode=False)
 
-        self.conv2_1 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv2_2 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.pool2 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), stride=(2,2), padding=0, ceil_mode=False)
+        self.conv2_1 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=64, activation='relu')
+        self.conv2_2 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=128, activation='relu')
+        self.pool2 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), strides=(2,2), padding=0, ceil_mode=False)
 
-        self.conv3_1 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv3_2 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv3_3 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.pool3 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), stride=(2,2), padding=0, ceil_mode=False)
+        self.conv3_1 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=128, activation='relu')
+        self.conv3_2 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=256, activation='relu')
+        self.conv3_3 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=256, activation='relu')
+        self.pool3 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), strides=(2,2), padding=0, ceil_mode=False)
 
-        self.conv4_1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv4_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv4_3 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.pool4 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), stride=(2,2), padding=0, ceil_mode=False)
+        self.conv4_1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=256, activation='relu')
+        self.conv4_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
+        self.conv4_3 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
+        self.pool4 = mx.gluon.nn.MaxPool2D(pool_size=(2,2), strides=(2,2), padding=0, ceil_mode=False)
         
-        self.conv5_1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv5_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv5_3 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
+        self.conv5_1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
+        self.conv5_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
+        self.conv5_3 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
 
-        self.conv6 = mx.gluon.nn.Conv2D(channels=1024, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), activation='relu')
-        self.conv7 = mx.gluon.nn.Conv2D(channels=1024, kernel_size=(1, 1), activation='relu')
-        self.conv8_1 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(1, 1), activation='relu')
-        self.conv8_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), strides=(2, 2), activation='relu')
-        self.conv9_1 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(1, 1), activation='relu')
-        self.conv9_2 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(2, 2), activation='relu')
-        self.conv10_1 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(1, 1), activation='relu')
-        self.conv10_2 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), strides=(1, 1), activation='relu')
+        self.conv6 = mx.gluon.nn.Conv2D(channels=1024, kernel_size=(3, 3), strides=(1, 1), padding=(1, 1), in_channels=512, activation='relu')
+        self.conv7 = mx.gluon.nn.Conv2D(channels=1024, kernel_size=(1, 1), in_channels=1024, activation='relu')
+        self.conv8_1 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(1, 1), in_channels=1024, activation='relu')
+        self.conv8_2 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), in_channels=256, strides=(2, 2), activation='relu')
+        self.conv9_1 = mx.gluon.nn.Conv2D(channels=128, kernel_size=(1, 1), in_channels=512, activation='relu')
+        self.conv9_2 = mx.gluon.nn.Conv2D(channels=256, kernel_size=(3, 3), in_channels=128, strides=(2, 2), activation='relu')
 
     def init_by_vgg(self, ctx):
         self.collect_params().initialize(mx.init.Normal(), ctx=ctx)
@@ -97,10 +95,6 @@ class SSDFeatures(mx.gluon.Block):
         f = self.conv9_1(f)
         f = self.conv9_2(f)
         features.append(f)
-        f = self.conv10_1(f)
-        f = self.conv10_2(f)
-        features.append(f)
-
         return features
 
 
@@ -114,3 +108,7 @@ class DetectorHead(mx.gluon.Block):
         f_cls = self.conv_cls(feature)
         f_reg = self.conv_reg(feature)
         return f_cls, f_reg
+
+    def init_params(self, ctx):
+        self.collect_params().initialize(mx.init.Normal(), ctx=ctx)
+

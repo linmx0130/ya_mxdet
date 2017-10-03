@@ -16,7 +16,7 @@ class VOCDataset(mx.gluon.data.Dataset):
                       'horse', 'sheep', 'aeroplane', 'bicycle', 'boat', 
                       'bus', 'car', 'motorbike', 'train', 'bottle', 
                       'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor']
-    def __init__(self, annotation_dir: str, img_dir: str, dataset_index:str, transform=None, **kwargs):
+    def __init__(self, annotation_dir: str, img_dir: str, dataset_index:str, transform=None, resize_func=None, **kwargs):
         """
         Args:
             annotation_dir: a string describing the path of annotation XML files.
@@ -30,6 +30,7 @@ class VOCDataset(mx.gluon.data.Dataset):
         self.annotation_dir = annotation_dir
         self.transform = transform
         self.class_to_id = {}
+        self.resize_func = resize_func
         for i, class_name in enumerate(self.voc_class_name):
             self.class_to_id[class_name] = i
     
@@ -37,11 +38,16 @@ class VOCDataset(mx.gluon.data.Dataset):
         idx = self.dataset_index[idx]
         img_path = os.path.join(self.img_dir, idx+'.jpg')
         img = cv2.imread(img_path)
+        if self.resize_func is not None:
+            img, scale = self.resize_func(img)
+        else:
+            scale = 1
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.transexpressionpose(img, (2, 0, 1))
-
+        img = np.transpose(img, (2, 0, 1))
         anno_path = os.path.join(self.annotation_dir, idx+'.xml')
         gt = self.convert_gt_into_array(parseFile(anno_path))
+        gt[:, 0:4] *= scale
+
         if self.transform is None:
             return img, gt
         else:
@@ -66,23 +72,6 @@ class VOCDataset(mx.gluon.data.Dataset):
             new_array.append(self.class_to_id[obj['name']])
             ret.append(new_array)
         return np.asarray(ret, dtype=np.float32)
-
-
-def random_flip(data, label):
-    if np.random.uniform() > 0.5:
-        c, h, w = data.shape
-        data = np.flip(data, axis=2)
-        label[:, 0] = w - label[:, 0]
-        label[:, 2] = w - label[:, 2]
-    return data, label
-
-
-def imagenetNormalize(img):
-    mean = mx.nd.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
-    std = mx.nd.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
-    img = mx.nd.array(img / 255)
-    img = mx.image.color_normalize(img, mean, std)
-    return img
 
 
 def show_images(data, label, ds:VOCDataset):
