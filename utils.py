@@ -2,11 +2,12 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import mxnet as mx
+from mxnet import nd
 from config import cfg
 import numpy as np 
 import cv2
 
-
+# Model utils
 def bbox_transform(anchor, bbox):
     w = anchor[:, 2] - anchor[:, 0]
     h = anchor[:, 3] - anchor[:, 1]
@@ -46,12 +47,46 @@ def bbox_inverse_transform(anchor, bbox):
     g_x2 = g_cx + g_w / 2
     g_y2 = g_cy + g_h / 2
     return mx.ndarray.concatenate([
-                g_x1.reshape((-1, 1)), 
-                g_y1.reshape((-1, 1)), 
-                g_x2.reshape((-1, 1)), 
-                g_y2.reshape((-1, 1))], axis=1)
+                        g_x1.reshape((-1, 1)),
+                        g_y1.reshape((-1, 1)),
+                        g_x2.reshape((-1, 1)),
+                        g_y2.reshape((-1, 1))], axis=1)
 
 
+def _get_area(bbox:mx.nd.NDArray):
+    return (bbox[:,2] - bbox[:,0]) * (bbox[:, 3] - bbox[:,1])
+
+
+def bbox_overlaps(anchors:mx.nd.NDArray, gt:mx.nd.NDArray):
+    """
+    Get IoU of the anchors and ground truth bounding boxes.
+    The shape of anchors and gt should be (N, 4) and (M, 4)
+    So the shape of return value is (N, M)
+    """
+    ret = []
+    for i in range(gt.shape[0]):
+        cgt = gt[i].reshape((1, 4)).broadcast_to(anchors.shape)
+        # inter
+        x0 = nd.max(nd.stack(anchors[:,0], cgt[:,0]), axis=0)
+        y0 = nd.max(nd.stack(anchors[:,1], cgt[:,1]), axis=0)
+        x1 = nd.min(nd.stack(anchors[:,2], cgt[:,2]), axis=0)
+        y1 = nd.min(nd.stack(anchors[:,3], cgt[:,3]), axis=0)
+        
+        inter = _get_area(nd.concatenate([x0.reshape((-1, 1)), 
+                                         y0.reshape((-1, 1)), 
+                                         x1.reshape((-1, 1)), 
+                                         y1.reshape((-1, 1))], axis=1))
+        outer = _get_area(anchors) + _get_area(cgt) - inter
+        iou = inter / outer
+        ret.append(iou.reshape((-1, 1)))
+
+    ret=nd.concatenate(ret, axis=1)
+    return ret
+
+
+#
+# Data argumentation and normalization
+#
 def random_flip(data, label):
     if np.random.uniform() > 0.5:
         c, h, w = data.shape

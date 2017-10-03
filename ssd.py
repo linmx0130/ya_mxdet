@@ -99,10 +99,10 @@ class SSDFeatures(mx.gluon.Block):
 
 
 class DetectorHead(mx.gluon.Block):
-    def __init__(self, num_cls, **kwargs):
+    def __init__(self, num_cls, num_anchors, **kwargs):
         super(DetectorHead, self).__init__(**kwargs)
-        self.conv_cls = mx.gluon.nn.Conv2D(channels=num_cls, kernel_size=(3, 3),padding=(1, 1))
-        self.conv_reg = mx.gluon.nn.Conv2D(channels=4, kernel_size=(3,3), padding=(1, 1))
+        self.conv_cls = mx.gluon.nn.Conv2D(channels=num_cls*num_anchors, kernel_size=(3, 3),padding=(1, 1))
+        self.conv_reg = mx.gluon.nn.Conv2D(channels=4*num_anchors, kernel_size=(3,3), padding=(1, 1))
     
     def forward(self, feature, *args):
         f_cls = self.conv_cls(feature)
