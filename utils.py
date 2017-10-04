@@ -119,3 +119,18 @@ def img_resize(img):
         nh = int(h * scale)
         img = cv2.resize(img, (nw, nh))
     return img, scale
+
+
+def random_square_crop(img, label):
+    c, h, w = img.shape
+    if h>w:
+        x = np.random.randint(0, h-w)
+        img = img[:, x: x+w, :]
+        label[:, 1] -= x
+        label[:, 3] -= x
+    else:
+        x = np.random.randint(0, w - h)
+        img = img[:, :, x: x+h]
+        label[:, 0] -= x
+        label[:, 2] -= x
+    return img, label

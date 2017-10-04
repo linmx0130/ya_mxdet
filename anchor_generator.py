@@ -29,6 +29,25 @@ def generate_anchors(base_size=16, ratios=nd.array([0.5, 1, 2]), scales=2**nd.ar
                                  for i in range(ratio_anchors.shape[0])])
     return anchors
 
+
+def ssd_generate_anchors(scale, ratios=nd.array([0.5, 1, 2]), append_scale=None):
+    """
+    Generate anchor (reference) windows by enumerating aspect ratios X
+    scales wrt a reference (0, 0, scale, scale) window.
+    
+    append_scale is used to generate an extra anchor whose scale is 
+    \sqrt{scale*append_scale}. Set append_scale=None to disenable this 
+    extra anchor.
+    """
+    base_anchor = nd.array([1, 1, scale, scale]) - 1
+    anchors = _ratio_enum(base_anchor, ratios)
+    if append_scale is not None:
+        ns = int(scale * append_scale)
+        append_anchor = nd.round(nd.sqrt(nd.array([[1, 1, ns, ns]])))-1
+        anchors = nd.concatenate([anchors, append_anchor], axis=0)
+    return anchors
+
+
 def _whctrs(anchor:nd.NDArray):
     """
     Return width, height, x center, and y center for an anchor (window).
@@ -78,3 +97,21 @@ def _scale_enum(anchor, scales):
     hs = h * scales
     anchors = _mkanchors(ws, hs, x_ctr, y_ctr)
     return anchors
+
+def map_anchors(ref_anchors, target_shape, scale, ctx):
+    ref_anchors = ref_anchors.as_in_context(ctx)
+    ref_anchors = ref_anchors.reshape((1, -1, 1, 1))
+    ref_anchors = ref_anchors.broadcast_to(target_shape)
+    _n, _c, h, w = ref_anchors.shape
+    ref_x = nd.arange(h).as_in_context(ctx).reshape((h, 1)) / h 
+    ref_x = ref_x * scale
+    ref_x = ref_x.broadcast_to((h, w))
+    ref_y = nd.arange(w).as_in_context(ctx).reshape((1, w)) / w
+    ref_y = ref_y * scale
+    ref_y = ref_y.broadcast_to((h, w))
+    for anchor_i in range(_c//4):
+        ref_anchors[0, anchor_i * 4] += ref_x
+        ref_anchors[0, anchor_i * 4 + 1] += ref_y
+        ref_anchors[0, anchor_i * 4 + 2] += ref_x
+        ref_anchors[0, anchor_i * 4 + 3] += ref_y
+    return ref_anchors
