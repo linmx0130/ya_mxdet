@@ -5,8 +5,8 @@ from config import cfg
 from VOCDataset import VOCDataset
 from rpn import RPNFeatureExtractor, DetectorHead
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, bbox_overlaps
-from anchor_generator import generate_anchors, map_anchors
+from utils import random_flip, imagenetNormalize, img_resize, random_square_crop
+from rpn_gt_opr import rpn_gt_opr
 
 def train_transformation(data, label):
     data, label = random_flip(data, label)
@@ -23,42 +23,42 @@ train_datait = mx.gluon.data.DataLoader(train_dataset, batch_size=1, shuffle=Tru
 ctx = mx.gpu(0)
 feature_extractor = RPNFeatureExtractor()
 feature_extractor.init_by_vgg(ctx)
-rpn_head = DetectorHead(9)
+rpn_head = DetectorHead(len(cfg.anchor_ratios) * len(cfg.anchor_scales))
 rpn_head.init_params(ctx)
+cls_loss_func = mx.gluon.loss.SoftmaxCrossEntropyLoss(axis=2)
+trainer_head = mx.gluon.trainer.Trainer(rpn_head.collect_params(), 
+                                    'sgd', 
+                                    {'learning_rate': 0.01,
+                                     'wd': 0.0001,
+                                     'momentum': 0.9})
+
+trainer_feature = mx.gluon.trainer.Trainer(feature_extractor.collect_params(), 
+                                    'sgd', 
+                                    {'learning_rate': 0.01,
+                                     'wd': 0.0001,
+                                     'momentum': 0.9})
 
 for it, (data, label) in enumerate(train_datait):
     data = data.as_in_context(ctx)
     _n, _c, h, w = data.shape
     label = label.as_in_context(ctx).reshape((-1, 5))
-    background_bndbox = mx.nd.array([[-h*10,-h*10, h*10, w*10, 0]], ctx=ctx)
+    background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
     label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
-    label_count = label.shape[1]
     with mx.autograd.record():
         f = feature_extractor(data)
         rpn_cls, rpn_reg = rpn_head(f)
-        _fn, _fc, feature_height, feature_width = rpn_reg.shape
-        anchor_counts = _fc // 4
-        # only batch size=1 is supported
-        ref_anchors = generate_anchors(base_size=16)
-        anchors = map_anchors(ref_anchors, rpn_reg.shape, h, ctx)
-        anchors = anchors.reshape((1, -1, 4, feature_height, feature_width))
-        anchors = mx.nd.transpose(anchors, (0, 3, 4, 1, 2))
-        anchors = anchors.reshape((-1, 4))
-        # So until now, anchors are N * 4, the order is [(H, W, A), 4]
-        overlaps = bbox_overlaps(anchors, label.reshape((-1, 4)))
-        overlaps = overlaps.reshape((1, feature_height, feature_width, anchor_counts, -1))
-        # Reshape the overlaps to [1, H, W, A, #{label}]
-        overlaps = mx.nd.transpose(overlaps, (0, 3, 1, 2, 4))
-        # Transpose overlaps to [1, A, H, W, #{label}]
-        bbox_assignment = mx.nd.argmax(overlaps, axis=4)
-        # Get bbox_assignment to [1, A, H, W]
-        label_extend = label[:,:,4].reshape(
-                    (1, 1, 1, 1, label_count)).broadcast_to(
-                    (1, anchor_counts, feature_height, feature_width, label_count))
-        bbox_cls_gt = bbox_assignment > 0 # RPN only tell whether there is an object
-        #TODO: bbox_reg_gt 
-        from IPython import embed; embed()
-        break
-    #TODO
-    if it >= 5:
-        break
+        rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
+        f_height = f.shape[2]
+        f_width = f.shape[3]
+        # Reshape and transpose to the shape of gt
+        rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
+        rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
+        loss_cls = cls_loss_func(rpn_cls, rpn_cls_gt)
+        anchors_count = rpn_cls.shape[1]
+        mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
+        loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / (mx.nd.sum(rpn_cls_gt) + 1) # avoid all zeros
+        loss = loss_cls + loss_reg
+    loss.backward()
+    print("Iteration {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(it, loss.asscalar(), loss_cls.asscalar(), loss_reg.asscalar()))
+    trainer_head.step(data.shape[0])
+    trainer_feature.step(data.shape[0])

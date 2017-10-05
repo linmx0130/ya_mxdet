@@ -98,16 +98,16 @@ def _scale_enum(anchor, scales):
     anchors = _mkanchors(ws, hs, x_ctr, y_ctr)
     return anchors
 
-def map_anchors(ref_anchors, target_shape, scale, ctx):
+def map_anchors(ref_anchors, target_shape, scale_h, scale_w, ctx):
     ref_anchors = ref_anchors.as_in_context(ctx)
     ref_anchors = ref_anchors.reshape((1, -1, 1, 1))
     ref_anchors = ref_anchors.broadcast_to(target_shape)
     _n, _c, h, w = ref_anchors.shape
     ref_x = nd.arange(h).as_in_context(ctx).reshape((h, 1)) / h 
-    ref_x = ref_x * scale
+    ref_x = ref_x * scale_w
     ref_x = ref_x.broadcast_to((h, w))
     ref_y = nd.arange(w).as_in_context(ctx).reshape((1, w)) / w
-    ref_y = ref_y * scale
+    ref_y = ref_y * scale_h
     ref_y = ref_y.broadcast_to((h, w))
     for anchor_i in range(_c//4):
         ref_anchors[0, anchor_i * 4] += ref_x

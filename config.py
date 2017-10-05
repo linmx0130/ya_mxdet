@@ -13,11 +13,9 @@ class _Config:
     resize_short_size = 300
 
     # Anchors
-    feature_map_count = 4
-    anchor_scales = generate_ssd_scales(feature_map_count)
-    anchor_ratios = nd.array([1, 2, 3, 1.0/2, 1.0/3])
+    anchor_ratios = nd.array([0.5, 1, 2])
+    anchor_scales = 2**nd.arange(2, 5)
 
     # Ground truth assignment
-    iou_thresh = 0.7
-
+    iou_thresh = 0.3
 cfg = _Config()
