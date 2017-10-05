@@ -88,11 +88,13 @@ def bbox_overlaps(anchors:mx.nd.NDArray, gt:mx.nd.NDArray):
 # Data argumentation and normalization
 #
 def random_flip(data, label):
-    if np.random.uniform() > 0.5:
+    if np.random.uniform() > 0.0:
         c, h, w = data.shape
         data = np.flip(data, axis=2)
-        label[:, 0] = w - label[:, 0]
-        label[:, 2] = w - label[:, 2]
+        x0 = label[:, 0].copy()
+        x1 = label[:, 2].copy()
+        label[:, 0] = w - x1
+        label[:, 2] = w - x0
     return data, label
 
 
