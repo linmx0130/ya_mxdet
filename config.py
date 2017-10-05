@@ -17,4 +17,7 @@ class _Config:
     anchor_scales = generate_ssd_scales(feature_map_count)
     anchor_ratios = nd.array([1, 2, 3, 1.0/2, 1.0/3])
 
+    # Ground truth assignment
+    iou_thresh = 0.7
+
 cfg = _Config()

@@ -54,7 +54,10 @@ def bbox_inverse_transform(anchor, bbox):
 
 
 def _get_area(bbox:mx.nd.NDArray):
-    return (bbox[:,2] - bbox[:,0]) * (bbox[:, 3] - bbox[:,1])
+    zeros = mx.nd.zeros_like(bbox[:, 0])
+    width = mx.nd.max(nd.stack(bbox[:, 2] - bbox[:, 0], zeros), axis=0)
+    height = mx.nd.max(nd.stack(bbox[:, 3] - bbox[:, 1], zeros), axis=0)
+    return width * height
 
 
 def bbox_overlaps(anchors:mx.nd.NDArray, gt:mx.nd.NDArray):
@@ -79,7 +82,6 @@ def bbox_overlaps(anchors:mx.nd.NDArray, gt:mx.nd.NDArray):
         outer = _get_area(anchors) + _get_area(cgt) - inter
         iou = inter / outer
         ret.append(iou.reshape((-1, 1)))
-
     ret=nd.concatenate(ret, axis=1)
     return ret
 
