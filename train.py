@@ -31,6 +31,7 @@ trainer = mx.gluon.trainer.Trainer(net.collect_params(),
                                      'wd': 0.0001,
                                      'momentum': 0.9})
 
+anchors_count = len(cfg.anchor_ratios) * len(cfg.anchor_scales)
 for epoch in range(20):
     for it, (data, label) in enumerate(train_datait):
         data = data.as_in_context(ctx)
@@ -45,17 +46,15 @@ for epoch in range(20):
             f_width = f.shape[3]
             # Reshape and transpose to the shape of gt
             rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
+            rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
             rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
-            anchors_count = rpn_cls.shape[1]
             mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
             loss_reg = mx.nd.mean(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0))
-            
-            rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
             rpn_cls_gt = rpn_cls_gt.reshape((-1, 1))
             loss_cls = mx.nd.mean(cls_loss_func(rpn_cls, rpn_cls_gt))
             loss = loss_cls + loss_reg 
         loss.backward()
-        print("Epoch {} Iteration {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(
+        print("Epoch {} Iter {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(
                 epoch,it, loss.asscalar(), loss_cls.asscalar(), loss_reg.asscalar()))
         trainer.step(data.shape[0])
-    net.save_params(cfg.model_path_pattern.format(epoch)) 
+    net.collect_params().save(cfg.model_path_pattern.format(epoch)) 

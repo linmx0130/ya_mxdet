@@ -28,5 +28,6 @@ def show_anchors(data, label, anchors, anchors_chosen):
         if c==1:
             anc = anchors[anchor_id]
             cv2.rectangle(img, (int(anc[0]), int(anc[1])), (int(anc[2]), int(anc[3])), color=(0,0, 255), thickness=1)
+            print((int(anc[0]), int(anc[1])), (int(anc[2]), int(anc[3])))
     cv2.imshow("Img", img)
     cv2.waitKey(0)

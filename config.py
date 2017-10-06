@@ -20,7 +20,9 @@ class _Config:
     anchor_scales = 2**nd.arange(2, 5)
 
     # Ground truth assignment
-    iou_thresh = 0.4
+    iou_thresh = 0.5
 
+    # RPN Test
+    show_top_bbox_count = 10
 
 cfg = _Config()
