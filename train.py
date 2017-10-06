@@ -34,31 +34,31 @@ trainer_head = mx.gluon.trainer.Trainer(rpn_head.collect_params(),
 
 trainer_feature = mx.gluon.trainer.Trainer(feature_extractor.collect_params(), 
                                     'sgd', 
-                                    {'learning_rate': 0.01,
+                                    {'learning_rate': 0.001,
                                      'wd': 0.0001,
                                      'momentum': 0.9})
-
-for it, (data, label) in enumerate(train_datait):
-    data = data.as_in_context(ctx)
-    _n, _c, h, w = data.shape
-    label = label.as_in_context(ctx).reshape((-1, 5))
-    background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
-    label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
-    with mx.autograd.record():
-        f = feature_extractor(data)
-        rpn_cls, rpn_reg = rpn_head(f)
-        rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
-        f_height = f.shape[2]
-        f_width = f.shape[3]
-        # Reshape and transpose to the shape of gt
-        rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
-        rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
-        loss_cls = cls_loss_func(rpn_cls, rpn_cls_gt)
-        anchors_count = rpn_cls.shape[1]
-        mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
-        loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / (mx.nd.sum(rpn_cls_gt) + 1) # avoid all zeros
-        loss = loss_cls + loss_reg
-    loss.backward()
-    print("Iteration {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(it, loss.asscalar(), loss_cls.asscalar(), loss_reg.asscalar()))
-    trainer_head.step(data.shape[0])
-    trainer_feature.step(data.shape[0])
+while True:
+    for it, (data, label) in enumerate(train_datait):
+        data = data.as_in_context(ctx)
+        _n, _c, h, w = data.shape
+        label = label.as_in_context(ctx).reshape((-1, 5))
+        background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
+        label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
+        with mx.autograd.record():
+            f = feature_extractor(data)
+            rpn_cls, rpn_reg = rpn_head(f)
+            rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
+            f_height = f.shape[2]
+            f_width = f.shape[3]
+            # Reshape and transpose to the shape of gt
+            rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
+            rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
+            loss_cls = cls_loss_func(rpn_cls, rpn_cls_gt)
+            anchors_count = rpn_cls.shape[1]
+            mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
+            loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / (mx.nd.sum(rpn_cls_gt) + 1) # avoid all zeros
+            loss = loss_cls + loss_reg 
+        loss.backward()
+        print("Iteration {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(it, loss.asscalar(), loss_cls.asscalar(), loss_reg.asscalar()))
+        trainer_head.step(data.shape[0])
+        trainer_feature.step(data.shape[0])

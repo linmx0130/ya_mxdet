@@ -8,7 +8,7 @@ def generate_ssd_scales(feature_map_count):
 class _Config:
     # Dataset config
     annotation_dir='VOC2007Train/Annotations/'
-    dataset_index='VOC2007Train/ImageSets/Main/trainval.txt'
+    dataset_index='VOC2007Train/ImageSets/Main/debug.txt'
     img_dir='VOC2007Train/JPEGImages/'
     resize_short_size = 300
 
@@ -17,5 +17,5 @@ class _Config:
     anchor_scales = 2**nd.arange(2, 5)
 
     # Ground truth assignment
-    iou_thresh = 0.3
+    iou_thresh = 0.5
 cfg = _Config()

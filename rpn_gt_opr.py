@@ -6,7 +6,7 @@ from anchor_generator import generate_anchors, map_anchors
 from utils import bbox_overlaps, bbox_transform
 from config import cfg
 
-def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w):
+def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     _fn, _fc, feature_height, feature_width = reg_shape
     label_count = label.shape[1]
     anchor_counts = _fc // 4
@@ -18,7 +18,7 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w):
     anchors = anchors.reshape((-1, 4))
 
     # So until now, anchors are N * 4, the order is [(H, W, A), 4]
-    overlaps = bbox_overlaps(anchors, label.reshape((-1, 4)))
+    overlaps = bbox_overlaps(anchors, label[:, :, :4].reshape((-1, 4)))
     overlaps = overlaps.reshape((1, feature_height, feature_width, anchor_counts, -1))
     # Reshape the overlaps to [1, H, W, A, #{label}]
     overlaps = mx.nd.transpose(overlaps, (0, 3, 1, 2, 4))
@@ -40,4 +40,10 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w):
          mx.nd.pick(reg_label_extend[0][:,:,:,:,3], bbox_assignment[0]).reshape((1, anchor_counts, feature_height, feature_width))], axis=0)
     bbox_reg_gt = mx.nd.transpose(bbox_reg_gt, (1, 2, 3, 0)).reshape((1, anchor_counts, feature_height, feature_width, 4))
     bbox_reg_gt = bbox_transform(anchors, bbox_reg_gt.reshape((-1, 4))).reshape((1, anchor_counts, feature_height, feature_width, 4))
-    return bbox_cls_gt, bbox_reg_gt
+
+    if not return_anchors:
+        return bbox_cls_gt, bbox_reg_gt
+    else:
+        anchors = anchors.reshape((1, feature_height, feature_width, anchor_counts, 4))
+        anchors = mx.nd.transpose(anchors, (0, 3, 1, 2, 4))
+        return bbox_cls_gt, bbox_reg_gt, anchors
