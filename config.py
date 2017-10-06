@@ -8,14 +8,19 @@ def generate_ssd_scales(feature_map_count):
 class _Config:
     # Dataset config
     annotation_dir='VOC2007Train/Annotations/'
-    dataset_index='VOC2007Train/ImageSets/Main/debug.txt'
+    dataset_index='VOC2007Train/ImageSets/Main/trainval.txt'
     img_dir='VOC2007Train/JPEGImages/'
     resize_short_size = 300
+
+    # Model saved
+    model_path_pattern='./model_dump/epoch-{}.gluonmodel'
 
     # Anchors
     anchor_ratios = nd.array([0.5, 1, 2])
     anchor_scales = 2**nd.arange(2, 5)
 
     # Ground truth assignment
-    iou_thresh = 0.5
+    iou_thresh = 0.4
+
+
 cfg = _Config()

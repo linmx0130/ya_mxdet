@@ -79,7 +79,7 @@ class RPNFeatureExtractor(mx.gluon.Block):
 
 
 class DetectorHead(mx.gluon.Block):
-    def __init__(self,num_anchors, **kwargs):
+    def __init__(self, num_anchors, **kwargs):
         super(DetectorHead, self).__init__(**kwargs)
         self.conv1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), padding=(1,1), activation='relu')
         self.conv_cls = mx.gluon.nn.Conv2D(channels=2*num_anchors, kernel_size=(1, 1),padding=(0, 0))
@@ -92,5 +92,21 @@ class DetectorHead(mx.gluon.Block):
         return f_cls, f_reg
 
     def init_params(self, ctx):
-        self.collect_params().initialize(mx.init.Normal(), ctx=ctx)
+        self.collect_params().initialize(mx.init.Xavier(), ctx=ctx)
 
+
+
+class RPNBlock(mx.gluon.Block):
+    def __init__(self, num_anchors, **kwargs):
+        super(RPNBlock, self).__init__(**kwargs)
+        self.feature_exactor = RPNFeatureExtractor()
+        self.head = DetectorHead(num_anchors)
+    
+    def forward(self, data, *args):
+        f = self.feature_exactor(data)
+        f_cls, f_reg = self.head(f)
+        return f_cls, f_reg, f
+    
+    def init_params(self, ctx):
+        self.feature_exactor.init_by_vgg(ctx)
+        self.head.init_params(ctx)
