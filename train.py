@@ -39,9 +39,9 @@ for epoch in range(20):
     for it, (data, label) in enumerate(train_datait):
         data = data.as_in_context(ctx)
         _n, _c, h, w = data.shape
-        label = label.as_in_context(ctx).reshape((-1, 5))
-        background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
-        label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
+        label = label.as_in_context(ctx).reshape((1, -1, 5))
+        #background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
+        #label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
         with mx.autograd.record():
             rpn_cls, rpn_reg, f = net(data)
             rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
