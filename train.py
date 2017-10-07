@@ -5,8 +5,9 @@ from config import cfg
 from VOCDataset import VOCDataset
 from rpn import RPNBlock
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator
+from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform
 from rpn_gt_opr import rpn_gt_opr
+from debug_tool import show_anchors
 
 select_class = select_class_generator(1)
 
@@ -44,9 +45,14 @@ for epoch in range(20):
         #label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
         with mx.autograd.record():
             rpn_cls, rpn_reg, f = net(data)
-            rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
             f_height = f.shape[2]
             f_width = f.shape[3]
+            rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
+            # rpn_bbox_gt = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg_gt.reshape((-1, 4))).reshape((1, anchors_count, f_height, f_width, 4))
+            # rpn_bbox_gt = mx.nd.transpose(rpn_bbox_gt, (0, 2, 3, 1, 4))
+            # from IPython import embed; embed()
+            # show_anchors(data, label, anchors, rpn_cls_gt)
+            # show_anchors(data, label, rpn_bbox_gt, rpn_cls_gt)
             # Reshape and transpose to the shape of gt
             rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
             rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
