@@ -6,7 +6,7 @@ from config import cfg
 from VOCDataset import VOCDataset
 from rpn import RPNBlock
 import mxnet as mx
-from utils import imagenetNormalize, img_resize, bbox_inverse_transform
+from utils import imagenetNormalize, img_resize, bbox_inverse_transform, select_class_generator
 from anchor_generator import generate_anchors, map_anchors
 from debug_tool import show_anchors
 
@@ -15,7 +15,10 @@ def parse_args():
     parser.add_argument('model_file', metavar='model_file', type=str)
     return parser.parse_args()
 
+select_class = select_class_generator(1)
+
 def test_transformation(data, label):
+    data, label = select_class(data, label)
     data = imagenetNormalize(data)
     return data, label
 
@@ -25,7 +28,7 @@ test_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
                            transform=test_transformation,
                            resize_func=img_resize)
 
-test_datait = mx.gluon.data.DataLoader(test_dataset, batch_size=1, shuffle=True)
+test_datait = mx.gluon.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
 ctx = mx.gpu(0)
 net = RPNBlock(len(cfg.anchor_ratios) * len(cfg.anchor_scales))
 net.init_params(ctx)
@@ -54,5 +57,6 @@ for it, (data, label) in enumerate(test_datait):
     
     rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 3, 4, 1, 2))
     rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
+    show_anchors(data, label, anchors, rpn_anchor_chosen)
     show_anchors(data, label, rpn_bbox_pred, rpn_anchor_chosen)
     

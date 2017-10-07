@@ -138,3 +138,13 @@ def random_square_crop(img, label):
         label[:, 0] -= x
         label[:, 2] -= x
     return img, label
+
+
+def select_class_generator(class_id):
+    def select_class(img, label):
+        ret_label = []
+        for item in label:
+            if item[4] == class_id:
+                ret_label.append(item)
+        return img, np.stack(ret_label)
+    return select_class

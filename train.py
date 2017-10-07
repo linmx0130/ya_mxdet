@@ -5,12 +5,15 @@ from config import cfg
 from VOCDataset import VOCDataset
 from rpn import RPNBlock
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop
+from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator
 from rpn_gt_opr import rpn_gt_opr
+
+select_class = select_class_generator(1)
 
 def train_transformation(data, label):
     data, label = random_flip(data, label)
     #data, label = random_square_crop(data, label)
+    data, label = select_class(data, label)
     data = imagenetNormalize(data)
     return data, label
 
@@ -28,7 +31,7 @@ cls_loss_func = mx.gluon.loss.SoftmaxCrossEntropyLoss()
 trainer = mx.gluon.trainer.Trainer(net.collect_params(), 
                                     'sgd', 
                                     {'learning_rate': 0.001,
-                                     'wd': 0.0001,
+                                     'wd': 0.0005,
                                      'momentum': 0.9})
 
 anchors_count = len(cfg.anchor_ratios) * len(cfg.anchor_scales)
