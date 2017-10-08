@@ -18,7 +18,7 @@ def softmax_celoss_with_ignore(F, label, ignore_label):
     output = mx.nd.log_softmax(F)
     label_matrix = mx.nd.zeros(output.shape, ctx=output.context)
     for i in range(label_matrix.shape[1]):
-        label_matrix[:, i] = label==i
+        label_matrix[:, i] = (label==i)
     ignore_unit = (label == ignore_label)
     loss = -mx.nd.sum(output * label_matrix, axis=1)
     return loss.sum() / (output.shape[0] - mx.nd.sum(ignore_unit))
@@ -55,12 +55,11 @@ for epoch in range(20):
             rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
             # Reshape and transpose to the shape of gt
             rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
-            rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
+            rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2))
             rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
             mask = (rpn_cls_gt==1).reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
             loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / mx.nd.sum(mask)
-            rpn_cls_gt = rpn_cls_gt.reshape((-1, 1))
-            loss_cls = softmax_celoss_with_ignore(rpn_cls, rpn_cls_gt, -1)
+            loss_cls = softmax_celoss_with_ignore(rpn_cls.reshape((-1, 2)), rpn_cls_gt.reshape((-1, )), -1)
             loss = loss_cls + loss_reg 
         loss.backward()
         print("Epoch {} Iter {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(

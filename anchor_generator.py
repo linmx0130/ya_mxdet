@@ -23,7 +23,7 @@ def generate_anchors(base_size=16, ratios=nd.array([0.5, 1, 2]), scales=2**nd.ar
     https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/rpn/generate_anchors.py
     """
 
-    base_anchor = nd.array([1, 1, base_size, base_size]) -1
+    base_anchor = nd.array([1, 1, base_size, base_size])
     ratio_anchors = _ratio_enum(base_anchor, ratios)
     anchors = nd.concatenate([_scale_enum(ratio_anchors[i, :], scales)
                                  for i in range(ratio_anchors.shape[0])])
@@ -39,11 +39,11 @@ def ssd_generate_anchors(scale, ratios=nd.array([0.5, 1, 2]), append_scale=None)
     \sqrt{scale*append_scale}. Set append_scale=None to disenable this 
     extra anchor.
     """
-    base_anchor = nd.array([1, 1, scale, scale]) - 1
+    base_anchor = nd.array([1, 1, scale, scale])
     anchors = _ratio_enum(base_anchor, ratios)
     if append_scale is not None:
         ns = int(scale * append_scale)
-        append_anchor = nd.round(nd.sqrt(nd.array([[1, 1, ns, ns]])))-1
+        append_anchor = nd.round(nd.sqrt(nd.array([[1, 1, ns, ns]])))
         anchors = nd.concatenate([anchors, append_anchor], axis=0)
     return anchors
 
@@ -103,10 +103,10 @@ def map_anchors(ref_anchors, target_shape, scale_h, scale_w, ctx):
     ref_anchors = ref_anchors.reshape((1, -1, 1, 1))
     ref_anchors = ref_anchors.broadcast_to(target_shape)
     _n, _c, h, w = ref_anchors.shape
-    ref_x = nd.arange(h).as_in_context(ctx).reshape((h, 1)) / h 
+    ref_x = nd.arange(w).as_in_context(ctx).reshape((1, w)) / w
     ref_x = ref_x * scale_w
     ref_x = ref_x.broadcast_to((h, w))
-    ref_y = nd.arange(w).as_in_context(ctx).reshape((1, w)) / w
+    ref_y = nd.arange(h).as_in_context(ctx).reshape((h, 1)) / h
     ref_y = ref_y * scale_h
     ref_y = ref_y.broadcast_to((h, w))
     for anchor_i in range(_c//4):
