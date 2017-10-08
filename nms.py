@@ -35,7 +35,7 @@ def nms(bbox_scores, bbox_pred, iou_thresh):
             current_mask[:idx+1] = 1
             keep_mask *= current_mask
     keep_inds = np.where(keep_mask)
-    return bbox_scores[keep_inds], box_pred[keep_inds]
+    return bbox_scores[keep_inds], bbox_pred[keep_inds]
 
 def test_nms():
     bbox = np.array([
