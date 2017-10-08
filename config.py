@@ -25,6 +25,7 @@ class _Config:
     iou_negative_thresh = 0.3
 
     # RPN Test
-    show_top_bbox_count = 20
+    bbox_count_before_nms = 2000
+    nms_thresh = 0.3
 
 cfg = _Config()

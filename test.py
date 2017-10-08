@@ -9,6 +9,7 @@ import mxnet as mx
 from utils import imagenetNormalize, img_resize, bbox_inverse_transform, select_class_generator
 from anchor_generator import generate_anchors, map_anchors
 from debug_tool import show_anchors
+from nms import nms
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Test RPN")
@@ -50,11 +51,12 @@ for it, (data, label) in enumerate(test_datait):
     anchors = anchors.reshape((1, -1, 4, f_height, f_width))
     anchors = mx.nd.transpose(anchors, (0, 3, 4, 1, 2))
     rpn_anchor_scores = mx.nd.softmax(mx.nd.transpose(rpn_cls, (0, 3, 4, 1, 2)), axis=4)[:,:,:,:,1]
-    score_thresh = mx.nd.sort(rpn_anchor_scores.reshape((-1, )), is_ascend=False)[cfg.show_top_bbox_count - 1]
-    rpn_anchor_chosen = rpn_anchor_scores >= score_thresh
     
     rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 3, 4, 1, 2))
     rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
-    #show_anchors(data, label, anchors, rpn_anchor_chosen)
-    show_anchors(data, label, rpn_bbox_pred, rpn_anchor_chosen)
-    
+    rpn_bbox_pred = rpn_bbox_pred.asnumpy().reshape((-1, 4))
+    rpn_anchor_scores = rpn_anchor_scores.asnumpy().reshape((-1, 1))
+    rpn_anchor_scores, rpn_bbox_pred = nms(rpn_anchor_scores, rpn_bbox_pred, cfg.nms_thresh)
+    rpn_anchor_scores = mx.nd.array(rpn_anchor_scores)
+    rpn_bbox_pred = mx.nd.array(rpn_bbox_pred)
+    show_anchors(data, label, rpn_bbox_pred, md.nd.ones(rpn_anchor_scores.shape))
