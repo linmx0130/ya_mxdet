@@ -9,12 +9,8 @@ from utils import random_flip, imagenetNormalize, img_resize, random_square_crop
 from rpn_gt_opr import rpn_gt_opr
 from debug_tool import show_anchors
 
-select_class = select_class_generator(1)
-
 def train_transformation(data, label):
     data, label = random_flip(data, label)
-    #data, label = random_square_crop(data, label)
-    data, label = select_class(data, label)
     data = imagenetNormalize(data)
     return data, label
 
@@ -58,7 +54,7 @@ for epoch in range(20):
             rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
             rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
             mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
-            loss_reg = mx.nd.mean(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0))
+            loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / mx.nd.sum(mask)
             rpn_cls_gt = rpn_cls_gt.reshape((-1, 1))
             loss_cls = mx.nd.mean(cls_loss_func(rpn_cls, rpn_cls_gt))
             loss = loss_cls + loss_reg 

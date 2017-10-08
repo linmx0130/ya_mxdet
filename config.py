@@ -8,8 +8,8 @@ def generate_ssd_scales(feature_map_count):
 class _Config:
     # Dataset config
     annotation_dir='VOC2007Train/Annotations/'
-    #dataset_index='VOC2007Train/ImageSets/Main/person_train.txt'
-    dataset_index='person.txt'
+    dataset_index='VOC2007Train/ImageSets/Main/trainval.txt'
+    #dataset_index='person.txt'
     img_dir='VOC2007Train/JPEGImages/'
     resize_short_size = 600
 
@@ -25,6 +25,6 @@ class _Config:
     iou_negative_thresh = 0.3
 
     # RPN Test
-    show_top_bbox_count = 10
+    show_top_bbox_count = 20
 
 cfg = _Config()

@@ -83,7 +83,7 @@ class DetectorHead(mx.gluon.Block):
         super(DetectorHead, self).__init__(**kwargs)
         self.conv1 = mx.gluon.nn.Conv2D(channels=512, kernel_size=(3, 3), padding=(1,1), activation='relu', weight_initializer=mx.init.Normal(0.01))
         self.conv_cls = mx.gluon.nn.Conv2D(channels=2*num_anchors, kernel_size=(1, 1),padding=(0, 0), weight_initializer=mx.init.Normal(0.01))
-        self.conv_reg = mx.gluon.nn.Conv2D(channels=4*num_anchors, kernel_size=(1, 1), padding=(0, 0), weight_initializer=mx.init.Normal(0.001))
+        self.conv_reg = mx.gluon.nn.Conv2D(channels=4*num_anchors, kernel_size=(1, 1), padding=(0, 0), weight_initializer=mx.init.Normal(0.01))
     
     def forward(self, feature, *args):
         f = self.conv1(feature)
