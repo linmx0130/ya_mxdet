@@ -3,6 +3,7 @@
 
 import mxnet as mx
 from anchor_generator import generate_anchors, map_anchors
+import numpy as np
 from utils import bbox_overlaps, bbox_transform
 from config import cfg
 
@@ -29,6 +30,23 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     bbox_assignment = mx.nd.argmax(overlaps, axis=1)
     for i in gt_assignment.asnumpy():
         bbox_cls_gt[int(i)] = 1
+    num_fg = int(cfg.rpn_fg_fraction * cfg.rpn_batchsize)
+    num_bg = cfg.rpn_batchsize - num_fg
+
+    bbox_cls_gt_np = bbox_cls_gt.asnumpy()
+    # sample fg if there are too many positive examples
+    if (np.sum(bbox_cls_gt_np == 1) > num_fg):
+        fg_inds = np.where(bbox_cls_gt_np==1)[0]
+        disable_inds = np.random.choice(fg_inds, size=(len(fg_inds) - num_fg), replace=False)
+        bbox_cls_gt_np[disable_inds] = -1
+    
+    # sample bg if there are too many negative examples
+    if (np.sum(bbox_cls_gt_np == 0) > num_bg):
+        bg_inds = np.where(bbox_cls_gt_np==0)[0]
+        disable_inds = np.random.choice(bg_inds, size=(len(bg_inds) - num_fg), replace=False)
+        bbox_cls_gt_np[disable_inds] = -1
+
+    bbox_cls_gt = mx.nd.array(bbox_cls_gt_np, bbox_cls_gt.context)
     bbox_cls_gt = bbox_cls_gt.reshape((1, feature_height, feature_width, anchor_counts))
     bbox_cls_gt = mx.nd.transpose(bbox_cls_gt, (0, 3, 1, 2))
     bbox_assignment = bbox_assignment.reshape((1, feature_height, feature_width, anchor_counts))

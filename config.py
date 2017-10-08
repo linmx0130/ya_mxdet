@@ -23,6 +23,8 @@ class _Config:
     # Ground truth assignment
     iou_positive_thresh = 0.7
     iou_negative_thresh = 0.3
+    rpn_fg_fraction = 0.5
+    rpn_batchsize = 256
 
     # RPN Test
     bbox_count_before_nms = 2000
