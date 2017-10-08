@@ -23,7 +23,9 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     overlaps = bbox_overlaps(anchors, label[:, :, :4].reshape((-1, 4)))
     # Any gt has its own bbox, gt_assignment in [(1, H, W, A), #{gt}]
     gt_assignment = mx.nd.argmax(overlaps, axis=0)
-    bbox_cls_gt = (mx.nd.max(overlaps, axis=1) >= cfg.iou_positive_thresh)
+    max_overlaps = mx.nd.max(overlaps, axis=1)
+    bbox_cls_gt = (max_overlaps >= cfg.iou_positive_thresh)
+    bbox_cls_gt = bbox_cls_gt - ((max_overlaps > cfg.iou_negative_thresh) * (max_overlaps < cfg.iou_positive_thresh))
     bbox_assignment = mx.nd.argmax(overlaps, axis=1)
     for i in gt_assignment.asnumpy():
         bbox_cls_gt[int(i)] = 1
@@ -36,11 +38,6 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     anchors = anchors.reshape((1, feature_height, feature_width, anchor_counts, 4))
     anchors = mx.nd.transpose(anchors, (0, 3, 1, 2, 4))
 
-    # Reshape the overlaps to [1, H, W, A, #{gt}]
-    # overlaps = overlaps.reshape((1, feature_height, feature_width, anchor_counts, -1))
-    # Transpose overlaps to [1, A, H, W, #{gt}]
-    # overlaps = mx.nd.transpose(overlaps, (0, 3, 1, 2, 4))
-    
     reg_label_extend = label[:,:,:4].reshape(
                 (1, 1, 1, 1, label_count, 4)).broadcast_to(
                 (1, anchor_counts, feature_height, feature_width, label_count, 4))

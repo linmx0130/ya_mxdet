@@ -21,7 +21,7 @@ class _Config:
     anchor_scales = 2**nd.arange(3, 6)
 
     # Ground truth assignment
-    iou_positive_thresh = 0.5
+    iou_positive_thresh = 0.7
     iou_negative_thresh = 0.3
 
     # RPN Test

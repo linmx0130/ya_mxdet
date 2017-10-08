@@ -4,7 +4,7 @@ import mxnet as mx
 import numpy as np
 import cv2
 
-def show_anchors(data, label, anchors, anchors_chosen):
+def show_anchors(data, label, anchors, anchors_chosen, count=None):
     """
     show image, ground truth and anchors in the same window
     """
@@ -29,5 +29,9 @@ def show_anchors(data, label, anchors, anchors_chosen):
             anc = anchors[anchor_id]
             cv2.rectangle(img, (int(anc[0]), int(anc[1])), (int(anc[2]), int(anc[3])), color=(0,0, 255), thickness=1)
             print((int(anc[0]), int(anc[1])), (int(anc[2]), int(anc[3])))
+        if count is not None:
+            count = count - 1
+            if count == 0:
+                break
     cv2.imshow("Img", img)
     cv2.waitKey(0)

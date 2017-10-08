@@ -14,6 +14,16 @@ def train_transformation(data, label):
     data = imagenetNormalize(data)
     return data, label
 
+def softmax_celoss_with_ignore(F, label, ignore_label):
+    output = mx.nd.log_softmax(F)
+    label_matrix = mx.nd.zeros(output.shape, ctx=output.context)
+    for i in range(label_matrix.shape[1]):
+        label_matrix[:, i] = label==i
+    ignore_unit = (label == ignore_label)
+    loss = -mx.nd.sum(output * label_matrix, axis=1)
+    return loss.sum() / (output.shape[0] - mx.nd.sum(ignore_unit))
+
+
 train_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
                            img_dir=cfg.img_dir,
                            dataset_index=cfg.dataset_index,
@@ -24,7 +34,6 @@ train_datait = mx.gluon.data.DataLoader(train_dataset, batch_size=1, shuffle=Tru
 ctx = mx.gpu(0)
 net = RPNBlock(len(cfg.anchor_ratios) * len(cfg.anchor_scales))
 net.init_params(ctx)
-cls_loss_func = mx.gluon.loss.SoftmaxCrossEntropyLoss()
 trainer = mx.gluon.trainer.Trainer(net.collect_params(), 
                                     'sgd', 
                                     {'learning_rate': 0.001,
@@ -44,19 +53,14 @@ for epoch in range(20):
             f_height = f.shape[2]
             f_width = f.shape[3]
             rpn_cls_gt, rpn_reg_gt = rpn_gt_opr(rpn_reg.shape, label, ctx, h, w)
-            # rpn_bbox_gt = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg_gt.reshape((-1, 4))).reshape((1, anchors_count, f_height, f_width, 4))
-            # rpn_bbox_gt = mx.nd.transpose(rpn_bbox_gt, (0, 2, 3, 1, 4))
-            # from IPython import embed; embed()
-            # show_anchors(data, label, anchors, rpn_cls_gt)
-            # show_anchors(data, label, rpn_bbox_gt, rpn_cls_gt)
             # Reshape and transpose to the shape of gt
             rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
             rpn_cls = mx.nd.transpose(rpn_cls, (0, 1, 3, 4, 2)).reshape((-1, 2))
             rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
-            mask = rpn_cls_gt.reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
+            mask = (rpn_cls_gt==1).reshape((1, anchors_count, f_height, f_width, 1)).broadcast_to((1, anchors_count, f_height, f_width, 4))
             loss_reg = mx.nd.sum(mx.nd.smooth_l1((rpn_reg - rpn_reg_gt) * mask, 3.0)) / mx.nd.sum(mask)
             rpn_cls_gt = rpn_cls_gt.reshape((-1, 1))
-            loss_cls = mx.nd.mean(cls_loss_func(rpn_cls, rpn_cls_gt))
+            loss_cls = softmax_celoss_with_ignore(rpn_cls, rpn_cls_gt, -1)
             loss = loss_cls + loss_reg 
         loss.backward()
         print("Epoch {} Iter {}: loss={:.4}, loss_cls={:.4}, loss_reg={:.4}".format(
