@@ -44,7 +44,6 @@ for it, (data, label) in enumerate(test_datait):
     f_height = f.shape[2]
     f_width = f.shape[3]
     rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
-    #rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 1, 3, 4, 2))
     anchors_count = rpn_cls.shape[1]
 
     ref_anchors = generate_anchors(base_size=16, ratios=cfg.anchor_ratios, scales=cfg.anchor_scales)

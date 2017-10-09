@@ -46,8 +46,6 @@ for epoch in range(20):
         data = data.as_in_context(ctx)
         _n, _c, h, w = data.shape
         label = label.as_in_context(ctx).reshape((1, -1, 5))
-        #background_bndbox = mx.nd.array([[0, 0, 1, 1, 0]], ctx=ctx)
-        #label = mx.nd.concatenate([background_bndbox, label], axis=0).reshape((1, -1, 5))
         with mx.autograd.record():
             rpn_cls, rpn_reg, f = net(data)
             f_height = f.shape[2]
