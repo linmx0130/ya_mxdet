@@ -25,10 +25,16 @@ class _Config:
     iou_negative_thresh = 0.3
     rpn_fg_fraction = 0.5
     rpn_batchsize = 256
+    rcnn_fg_thresh = 0.5
+    rcnn_bg_lo_thresh = 0.1
+    rcnn_train_sample_size = 256
+    rcnn_train_fg_fraction = 0.5
+
 
     # RPN Test
     bbox_count_before_nms = 2000
     nms_thresh = 0.3
+    rpn_nms_thresh = 0.7
     test_annotation_dir='VOC2007Train/Annotations/'
     test_dataset_index='VOC2007Train/ImageSets/Main/test.txt'
     test_img_dir='VOC2007Train/JPEGImages/'
