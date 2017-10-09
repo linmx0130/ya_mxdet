@@ -29,5 +29,8 @@ class _Config:
     # RPN Test
     bbox_count_before_nms = 2000
     nms_thresh = 0.3
+    test_annotation_dir='VOC2007Train/Annotations/'
+    test_dataset_index='VOC2007Train/ImageSets/Main/test.txt'
+    test_img_dir='VOC2007Train/JPEGImages/'
 
 cfg = _Config()

@@ -14,6 +14,7 @@ from nms import nms
 def parse_args():
     parser = argparse.ArgumentParser(description="Test RPN")
     parser.add_argument('model_file', metavar='model_file', type=str)
+    parser.add_argument('--show_top_n', metavar='show_top_n', type=int, default=4)
     return parser.parse_args()
 
 
@@ -21,9 +22,9 @@ def test_transformation(data, label):
     data = imagenetNormalize(data)
     return data, label
 
-test_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
-                           img_dir=cfg.img_dir,
-                           dataset_index=cfg.dataset_index,
+test_dataset = VOCDataset(annotation_dir=cfg.test_annotation_dir,
+                           img_dir=cfg.test_img_dir,
+                           dataset_index=cfg.test_dataset_index,
                            transform=test_transformation,
                            resize_func=img_resize)
 
@@ -59,4 +60,4 @@ for it, (data, label) in enumerate(test_datait):
     rpn_anchor_scores, rpn_bbox_pred = nms(rpn_anchor_scores, rpn_bbox_pred, cfg.nms_thresh)
     rpn_anchor_scores = mx.nd.array(rpn_anchor_scores.reshape((1, -1)))
     rpn_bbox_pred = mx.nd.array(rpn_bbox_pred.reshape((1, -1, 4)))
-    show_anchors(data, label, rpn_bbox_pred, mx.nd.ones(rpn_anchor_scores.shape), count=10)
+    show_anchors(data, label, rpn_bbox_pred, mx.nd.ones(rpn_anchor_scores.shape), count=args.show_top_n)
