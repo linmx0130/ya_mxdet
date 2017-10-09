@@ -13,6 +13,8 @@ to tune it carefully for your tasks.
  Refer to 
 <https://mxnet.incubator.apache.org/get_started/install.html> for more details.
 
+OpenCV is also required. [Installation from source](http://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) is highly recommended, since in the repo of some linux distribution OpenCV does not support *imshow()*.
+
 
 ## Run the model
 Before you train a model, you need to prepare Pascal VOC 2007 dataset. You can 
