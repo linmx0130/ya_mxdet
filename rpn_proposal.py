@@ -10,7 +10,6 @@ from config import cfg
 
 
 def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
-
     # Stop gradient to stop gradient recording
     rpn_cls = mx.nd.stop_gradient(rpn_cls)
     rpn_reg = mx.nd.stop_gradient(rpn_reg)
@@ -42,7 +41,7 @@ def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
 
     # assign label for rpn_bbox_pred
     overlaps = bbox_overlaps(rpn_bbox_pred, gt[0][:, :4].reshape((-1, 4)))
-    gt_assignment = mx.nd.argmax(overlaps, axis=1).asnumpy()
+    gt_assignment = mx.nd.argmax(overlaps, axis=1).asnumpy().astype(np.int32)
     max_overlaps = mx.nd.max(overlaps, axis=1).asnumpy()
     gt_labels = gt[0][:, 4].reshape((-1,)).asnumpy()
     gt_bboxes = gt[0][:, :4].reshape((-1, 4)).asnumpy()
@@ -69,3 +68,37 @@ def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
     reg_target = bbox_transform(rpn_bbox_pred, reg_target)
     
     return rpn_bbox_pred, reg_target, cls_labels
+
+
+def proposal_test(rpn_cls, rpn_reg, feature_shape, image_shape, ctx):
+    # Stop gradient to stop gradient recording
+    rpn_cls = mx.nd.stop_gradient(rpn_cls)
+    rpn_reg = mx.nd.stop_gradient(rpn_reg)
+
+    # Get basic information of the feature and the image
+    _n, _c, f_height, f_width = feature_shape
+    _in, _ic, img_height, img_width = image_shape
+    rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
+    anchors_count = rpn_cls.shape[1]
+    
+    # Recover RPN prediction with anchors
+    ref_anchors = generate_anchors(base_size=16, ratios=cfg.anchor_ratios, scales=cfg.anchor_scales)
+    anchors = map_anchors(ref_anchors, rpn_reg.shape, img_height, img_width, ctx)
+    anchors = anchors.reshape((1, -1, 4, f_height, f_width))
+    anchors = mx.nd.transpose(anchors, (0, 3, 4, 1, 2))
+    rpn_anchor_scores = mx.nd.softmax(mx.nd.transpose(rpn_cls, (0, 3, 4, 1, 2)), axis=4)[:,:,:,:,1]
+    rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 3, 4, 1, 2))
+    rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
+
+    # Use NMS to filter out too many boxes
+    rpn_bbox_pred = rpn_bbox_pred.asnumpy().reshape((-1, 4))
+    rpn_anchor_scores = rpn_anchor_scores.asnumpy().reshape((-1, ))
+    rpn_anchor_scores, rpn_bbox_pred = nms(rpn_anchor_scores, rpn_bbox_pred, cfg.rpn_nms_thresh, use_top_n=cfg.bbox_count_before_nms)
+    rpn_bbox_pred = mx.nd.array(rpn_bbox_pred, ctx)
+    del rpn_anchor_scores
+
+    # Keep first cfg.rcnn_test_sample_size boxes
+    if rpn_bbox_pred.shape[0] > cfg.rcnn_test_sample_size:
+        rpn_bbox_pred = rpn_bbox_pred[:cfg.rcnn_test_sample_size, :]
+    
+    return rpn_bbox_pred

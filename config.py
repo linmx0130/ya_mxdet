@@ -28,7 +28,8 @@ class _Config:
     rcnn_fg_thresh = 0.5
     rcnn_bg_lo_thresh = 0.1
     rcnn_train_sample_size = 256
-    rcnn_train_fg_fraction = 0.5
+    rcnn_test_sample_size = 256
+    rcnn_train_fg_fractio = 0.5
 
 
     # RPN Test

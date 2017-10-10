@@ -5,7 +5,7 @@ from config import cfg
 from VOCDataset import VOCDataset
 from rpn import RPNBlock
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform
+from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
 from rpn_gt_opr import rpn_gt_opr
 from debug_tool import show_anchors
 
@@ -13,16 +13,6 @@ def train_transformation(data, label):
     data, label = random_flip(data, label)
     data = imagenetNormalize(data)
     return data, label
-
-def softmax_celoss_with_ignore(F, label, ignore_label):
-    output = mx.nd.log_softmax(F)
-    label_matrix = mx.nd.zeros(output.shape, ctx=output.context)
-    for i in range(label_matrix.shape[1]):
-        label_matrix[:, i] = (label==i)
-    ignore_unit = (label == ignore_label)
-    loss = -mx.nd.sum(output * label_matrix, axis=1)
-    return loss.sum() / (output.shape[0] - mx.nd.sum(ignore_unit))
-
 
 train_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
                            img_dir=cfg.img_dir,

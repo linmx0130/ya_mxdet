@@ -148,3 +148,14 @@ def select_class_generator(class_id):
                 ret_label.append(item)
         return img, np.stack(ret_label)
     return select_class
+
+
+def softmax_celoss_with_ignore(F, label, ignore_label):
+    output = mx.nd.log_softmax(F)
+    label_matrix = mx.nd.zeros(output.shape, ctx=output.context)
+    for i in range(label_matrix.shape[1]):
+        label_matrix[:, i] = (label==i)
+    ignore_unit = (label == ignore_label)
+    loss = -mx.nd.sum(output * label_matrix, axis=1)
+    return mx.nd.sum(loss) / (output.shape[0] - mx.nd.sum(ignore_unit))
+
