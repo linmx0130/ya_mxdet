@@ -12,6 +12,7 @@ class _Config:
     #dataset_index='person.txt'
     img_dir='VOC2007Train/JPEGImages/'
     resize_short_size = 600
+    num_classes = 21 # added background
 
     # Model saved
     model_path_pattern='./model_dump/epoch-{}.gluonmodel'
@@ -29,8 +30,7 @@ class _Config:
     rcnn_bg_lo_thresh = 0.1
     rcnn_train_sample_size = 256
     rcnn_test_sample_size = 256
-    rcnn_train_fg_fractio = 0.5
-
+    rcnn_train_fg_fraction = 0.5
 
     # RPN Test
     bbox_count_before_nms = 2000

@@ -67,7 +67,14 @@ def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
     rpn_bbox_pred = mx.nd.array(rpn_bbox_pred_np, ctx)
     reg_target = bbox_transform(rpn_bbox_pred, reg_target)
     
-    return rpn_bbox_pred, reg_target, cls_labels
+    # Shape reg_target into 4 * num_classes
+    reg_large_target = mx.nd.zeros((reg_target.shape[0], 4 * cfg.num_classes), ctx)
+    for i in range(cls_labels.shape[0]):
+        cur_label = int(cls_labels[i].asscalar())
+        if (cur_label != 0):
+            reg_large_target[i, (cur_label-1)*4: cur_label*4] = reg_target[i, :]
+    
+    return rpn_bbox_pred, reg_large_target, cls_labels
 
 
 def proposal_test(rpn_cls, rpn_reg, feature_shape, image_shape, ctx):
