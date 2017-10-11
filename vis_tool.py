@@ -63,9 +63,9 @@ def show_detection_result(data, label, bboxes, cls_scores, class_name_list):
         bboxes_pick = bboxes[:, cls_id * 4: (cls_id+1)*4]
         cur_scores, bboxes_pick = nms(cur_scores, bboxes_pick, cfg.rcnn_nms_thresh)
         for i in range(len(cur_scores)):
-            if cur_scores >= cfg.rcnn_score_thresh:
+            if cur_scores[i] >= cfg.rcnn_score_thresh:
                 bbox = bboxes_pick[i]
-                cv2.rectangle(img, int(int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color=(255, 0, 0), thickness=2)
-                cv2.putText(img, class_name_list[cls_id], (int(bbox[0]), int(bbox[3])),0, 0.5,(255, 255, 0))
+                cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color=(0, 0, 255), thickness=1)
+                cv2.putText(img, "{}: {:.4}".format(class_name_list[cls_id], cur_scores[i]), (int(bbox[0]), int(bbox[3])),0, 0.5,(255, 255, 0))
     cv2.imshow("Img", img)
     cv2.waitKey(0)

@@ -48,7 +48,8 @@ for it, (data, label) in enumerate(test_datait):
     rpn_bbox_pred_attach_batchid = mx.nd.concatenate([mx.nd.zeros((rpn_bbox_pred.shape[0], 1), ctx), rpn_bbox_pred], axis=1)
     f = mx.nd.ROIPooling(f, rpn_bbox_pred_attach_batchid, (7, 7), 1.0/16) # VGG16 based spatial stride=16
     rcnn_cls, rcnn_reg = net.rcnn(f)
-    rpn_bbox_pred = mx.nd.array(rcnn_reg.shape)
+    rcnn_bbox_pred = mx.nd.zeros(rcnn_reg.shape)
     for i in range(len(test_dataset.voc_class_name)):
-        rpn_bbox_pred[:, i*4:(i+1)*4] = bbox_inverse_transform(rpn_bbox_pred, rcnn_reg[:, i*4:(i+1)*4])
-    show_detection_result(data, label, rpn_bbox_pred, rpn_cls, test_dataset.voc_class_name)
+        rcnn_bbox_pred[:, i*4:(i+1)*4] = bbox_inverse_transform(rpn_bbox_pred, rcnn_reg[:, i*4:(i+1)*4])
+    rcnn_cls = mx.nd.softmax(rcnn_cls)
+    show_detection_result(data, label, rcnn_bbox_pred, rcnn_cls, test_dataset.voc_class_name)
