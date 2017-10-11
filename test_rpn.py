@@ -8,7 +8,7 @@ from rpn import RPNBlock
 import mxnet as mx
 from utils import imagenetNormalize, img_resize, bbox_inverse_transform, select_class_generator
 from anchor_generator import generate_anchors, map_anchors
-from debug_tool import show_anchors
+from vis_tool import show_anchors
 from nms import nms
 
 def parse_args():

@@ -23,11 +23,15 @@ def _bbox_overlaps(bbox, target):
     return iou
 
 
-def nms(bbox_scores, bbox_pred, iou_thresh):
+def nms(bbox_scores, bbox_pred, iou_thresh, use_top_n=None):
     bbox_inds = np.argsort(-bbox_scores)
     bbox_pred = bbox_pred[bbox_inds]
     bbox_scores = bbox_scores[bbox_inds]
-    keep_mask = np.ones(bbox_inds.shape)
+    if use_top_n is not None:
+        if (bbox_inds.shape[0] > use_top_n):
+            bbox_pred = bbox_pred[:use_top_n]
+            bbox_scores = bbox_scores[:use_top_n]
+    keep_mask = np.ones(bbox_scores.shape)
     for idx in range(keep_mask.shape[0]):
         if keep_mask[idx] == 1:
             iou = _bbox_overlaps(bbox_pred, bbox_pred[idx])

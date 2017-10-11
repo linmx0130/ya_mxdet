@@ -1,6 +1,6 @@
 Yet Another MXnet DETection(ya_mxdet)
 =====
-*ya_mxdet* provides a simple region proposal network 
+*ya_mxdet* provides a simple Faster R-CNN
 (proposed in [Faster R-CNN](https://arxiv.org/abs/1506.01497))
 implementation **fully in MXNet [gluon](http://gluon.mxnet.io) API**. More functions are in developing.
 
@@ -25,14 +25,14 @@ You also need a GPU with at least 11GB memory. The code may download VGG16
 pretrained model at the first run.
 <pre>
 $ mkdir model_dump
-$ python3 train.py
+$ python3 train_faster_rcnn.py
 </pre>
 
 ## Test the model
 Currently only a visualization tool is finished. You can watch the detection 
 result with 
 <pre>
-$ python3 test.py [model file]
+$ python3 test_faster_rcnn.py [model file]
 </pre>
 
 ## Other issues
@@ -40,7 +40,13 @@ All the code are distributed with a MIT-style license. If you use this repo in y
 
 ## Sample examples
 In following samples, the blue boxes are the ground truth while the red boxes 
-are the detection result. Only 4 boxes after NMS are shown in the demo.
+are the detection result. 
+### RCNN Demo
+Only the boxes with scores higher than 0.5 are shown in the demo. 
+
+![Demo3](images/demo3.png)
+### RPN Demo
+Only 4 boxes after NMS are shown in the demo.
 
 ![Demo1](images/demo1.png)
 ![Demo2](images/demo2.png)
