@@ -7,7 +7,6 @@ from faster_rcnn import FasterRCNN
 import mxnet as mx
 from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
 from rpn_gt_opr import rpn_gt_opr
-from debug_tool import show_anchors
 from rpn_proposal import proposal_train
 
 def train_transformation(data, label):

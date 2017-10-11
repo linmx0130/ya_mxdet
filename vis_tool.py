@@ -3,6 +3,8 @@
 import mxnet as mx 
 import numpy as np
 import cv2
+from nms import nms
+from config import cfg
 
 def show_anchors(data, label, anchors, anchors_chosen, count=None):
     """
@@ -49,8 +51,21 @@ def show_detection_result(data, label, bboxes, cls_scores, class_name_list):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     bboxes = bboxes.asnumpy()
     cls_scores = cls_scores.asnumpy()
+
+    # Show ground truth
+    for item in label:
+        cv2.rectangle(img, (int(item[0]), int(item[1])), (int(item[2]), int(item[3])), color=(255, 0, 0), thickness=2)
+        cv2.putText(img, class_name_list[int(item[4])], (int(item[0]), int(item[3])),0, 0.5,(0, 255, 0))
+
     # NMS by class
     for cls_id in range(1, len(class_name_list)):
         cur_scores = cls_scores[:, cls_id]
         bboxes_pick = bboxes[:, cls_id * 4: (cls_id+1)*4]
-        # TODO
+        cur_scores, bboxes_pick = nms(cur_scores, bboxes_pick, cfg.rcnn_nms_thresh)
+        for i in range(len(cur_scores)):
+            if cur_scores >= cfg.rcnn_score_thresh:
+                bbox = bboxes_pick[i]
+                cv2.rectangle(img, int(int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color=(255, 0, 0), thickness=2)
+                cv2.putText(img, class_name_list[cls_id], (int(bbox[0]), int(bbox[3])),0, 0.5,(255, 255, 0))
+    cv2.imshow("Img", img)
+    cv2.waitKey(0)

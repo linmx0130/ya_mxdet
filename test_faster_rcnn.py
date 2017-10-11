@@ -7,8 +7,7 @@ from VOCDataset import VOCDataset
 from faster_rcnn import FasterRCNN
 import mxnet as mx
 from utils import imagenetNormalize, img_resize, bbox_inverse_transform
-from anchor_generator import generate_anchors, map_anchors
-from nms import nms
+from vis_tool import show_detection_result
 from rpn_proposal import proposal_test
 
 def parse_args():
@@ -49,5 +48,7 @@ for it, (data, label) in enumerate(test_datait):
     rpn_bbox_pred_attach_batchid = mx.nd.concatenate([mx.nd.zeros((rpn_bbox_pred.shape[0], 1), ctx), rpn_bbox_pred], axis=1)
     f = mx.nd.ROIPooling(f, rpn_bbox_pred_attach_batchid, (7, 7), 1.0/16) # VGG16 based spatial stride=16
     rcnn_cls, rcnn_reg = net.rcnn(f)
-    rcnn_pred = bbox_inverse_transform(rpn_bbox_pred, rcnn_reg)
-    # TODO: show results
+    rpn_bbox_pred = mx.nd.array(rcnn_reg.shape)
+    for i in range(len(test_dataset.voc_class_name)):
+        rpn_bbox_pred[:, i*4:(i+1)*4] = bbox_inverse_transform(rpn_bbox_pred, rcnn_reg[:, i*4:(i+1)*4])
+    show_detection_result(data, label, rpn_bbox_pred, rpn_cls, test_dataset.voc_class_name)
