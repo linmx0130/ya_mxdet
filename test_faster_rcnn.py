@@ -9,6 +9,7 @@ import mxnet as mx
 from utils import imagenetNormalize, img_resize, bbox_inverse_transform
 from anchor_generator import generate_anchors, map_anchors
 from nms import nms
+from rpn_proposal import proposal_test
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Test Faster RCNN")
@@ -41,25 +42,7 @@ for it, (data, label) in enumerate(test_datait):
     rpn_cls, rpn_reg, f = net.rpn(data)
     f_height = f.shape[2]
     f_width = f.shape[3]
-    rpn_cls = rpn_cls.reshape((1, -1, 2, f_height, f_width))
-    anchors_count = rpn_cls.shape[1]
-
-    ref_anchors = generate_anchors(base_size=16, ratios=cfg.anchor_ratios, scales=cfg.anchor_scales)
-    anchors = map_anchors(ref_anchors, rpn_reg.shape, h, w, ctx)
-    anchors = anchors.reshape((1, -1, 4, f_height, f_width))
-    anchors = mx.nd.transpose(anchors, (0, 3, 4, 1, 2))
-    rpn_anchor_scores = mx.nd.softmax(mx.nd.transpose(rpn_cls, (0, 3, 4, 1, 2)), axis=4)[:,:,:,:,1]
-    
-    rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 3, 4, 1, 2))
-    rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
-    rpn_bbox_pred = rpn_bbox_pred.asnumpy().reshape((-1, 4))
-    rpn_anchor_scores = rpn_anchor_scores.asnumpy().reshape((-1, ))
-    rpn_anchor_scores, rpn_bbox_pred = nms(rpn_anchor_scores, rpn_bbox_pred, cfg.nms_thresh)
-    rpn_anchor_scores = mx.nd.array(rpn_anchor_scores.reshape((1, -1)))
-    rpn_bbox_pred = mx.nd.array(rpn_bbox_pred.reshape((1, -1, 4)))
-    if rpn_anchor_scores.shape[0] > cfg.rcnn_test_sample_size:
-        rpn_anchor_scores = rpn_anchor_scores[:cfg.rcnn_test_sample_size]
-        rpn_bbox_pred = rpn_bbox_pred[:cfg.rcnn_test_sample_size]
+    rpn_bbox_pred = proposal_test(rpn_cls, rpn_reg, f.shape, data.shape, ctx)
 
     # RCNN part 
     # add batch dimension

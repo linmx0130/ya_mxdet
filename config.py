@@ -31,10 +31,10 @@ class _Config:
     rcnn_train_sample_size = 256
     rcnn_test_sample_size = 256
     rcnn_train_fg_fraction = 0.5
+    rcnn_nms_thresh = 0.3
 
     # RPN Test
     bbox_count_before_nms = 2000
-    nms_thresh = 0.3
     rpn_nms_thresh = 0.7
     test_annotation_dir='VOC2007Train/Annotations/'
     test_dataset_index='VOC2007Train/ImageSets/Main/test.txt'

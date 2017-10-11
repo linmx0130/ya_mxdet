@@ -35,3 +35,22 @@ def show_anchors(data, label, anchors, anchors_chosen, count=None):
                 break
     cv2.imshow("Img", img)
     cv2.waitKey(0)
+
+
+def show_detection_result(data, label, bboxes, cls_scores, class_name_list):
+    data = data[0].as_in_context(mx.cpu(0))
+    data[0] = data[0] * 0.229 + 0.485
+    data[1] = data[1] * 0.224 + 0.456
+    data[2] = data[2] * 0.225 + 0.406
+    label = label[0].asnumpy()
+    img = data.asnumpy()
+    img = np.array(np.round(img * 255), dtype=np.uint8)
+    img = np.transpose(img, (1, 2, 0))
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    bboxes = bboxes.asnumpy()
+    cls_scores = cls_scores.asnumpy()
+    # NMS by class
+    for cls_id in range(1, len(class_name_list)):
+        cur_scores = cls_scores[:, cls_id]
+        bboxes_pick = bboxes[:, cls_id * 4: (cls_id+1)*4]
+        # TODO

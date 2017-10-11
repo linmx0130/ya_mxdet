@@ -72,7 +72,7 @@ def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
     for i in range(cls_labels.shape[0]):
         cur_label = int(cls_labels[i].asscalar())
         if (cur_label != 0):
-            reg_large_target[i, (cur_label-1)*4: cur_label*4] = reg_target[i, :]
+            reg_large_target[i, cur_label*4: (cur_label+1)*4] = reg_target[i, :]
     
     return rpn_bbox_pred, reg_large_target, cls_labels
 
