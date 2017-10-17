@@ -2,14 +2,14 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import argparse
-from config import cfg
+from faster_rcnn.config import cfg
 from VOCDataset import VOCDataset
-from rpn import RPNBlock
+from faster_rcnn.rpn import RPNBlock
 import mxnet as mx
-from utils import imagenetNormalize, img_resize, bbox_inverse_transform, select_class_generator
-from anchor_generator import generate_anchors, map_anchors
-from vis_tool import show_anchors
-from nms import nms
+from faster_rcnn.utils import imagenetNormalize, img_resize, bbox_inverse_transform, select_class_generator
+from faster_rcnn.anchor_generator import generate_anchors, map_anchors
+from faster_rcnn.vis_tool import show_anchors
+from faster_rcnn.nms import nms
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Test RPN")

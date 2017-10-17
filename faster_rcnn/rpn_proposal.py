@@ -3,10 +3,10 @@
 
 import mxnet as mx
 import numpy as np
-from anchor_generator import generate_anchors, map_anchors
-from utils import bbox_inverse_transform, bbox_overlaps, bbox_transform
-from nms import nms
-from config import cfg
+from .anchor_generator import generate_anchors, map_anchors
+from .utils import bbox_inverse_transform, bbox_overlaps, bbox_transform
+from .nms import nms
+from .config import cfg
 
 
 def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
@@ -27,7 +27,8 @@ def proposal_train(rpn_cls, rpn_reg, gt, feature_shape, image_shape, ctx):
     anchors = mx.nd.transpose(anchors, (0, 3, 4, 1, 2))
     rpn_anchor_scores = mx.nd.softmax(mx.nd.transpose(rpn_cls, (0, 3, 4, 1, 2)), axis=4)[:,:,:,:,1]
     rpn_reg = mx.nd.transpose(rpn_reg.reshape((1, -1, 4, f_height, f_width)), (0, 3, 4, 1, 2))
-    rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
+    with mx.autograd.pause():
+        rpn_bbox_pred = bbox_inverse_transform(anchors.reshape((-1, 4)), rpn_reg.reshape((-1, 4))).reshape((1, f_height, f_width, anchors_count, 4))
 
     # Use NMS to filter out too many boxes
     rpn_bbox_pred = rpn_bbox_pred.asnumpy().reshape((-1, 4))

@@ -2,10 +2,10 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import mxnet as mx
-from anchor_generator import generate_anchors, map_anchors
+from .anchor_generator import generate_anchors, map_anchors
 import numpy as np
-from utils import bbox_overlaps, bbox_transform
-from config import cfg
+from .utils import bbox_overlaps, bbox_transform
+from .config import cfg
 
 def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     _fn, _fc, feature_height, feature_width = reg_shape

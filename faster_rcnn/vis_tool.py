@@ -3,8 +3,8 @@
 import mxnet as mx 
 import numpy as np
 import cv2
-from nms import nms
-from config import cfg
+from .nms import nms
+from .config import cfg
 
 def show_anchors(data, label, anchors, anchors_chosen, count=None):
     """

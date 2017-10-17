@@ -2,8 +2,8 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import mxnet as mx
-from config import cfg
-from rpn import RPNBlock
+from .config import cfg
+from .rpn import RPNBlock
 
 def _set_dense_weights(lv: mx.gluon.nn.Dense, rv: mx.gluon.nn.Dense):
     lv.weight.set_data(rv.weight.data())

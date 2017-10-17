@@ -36,7 +36,7 @@ def ssd_generate_anchors(scale, ratios=nd.array([0.5, 1, 2]), append_scale=None)
     scales wrt a reference (0, 0, scale, scale) window.
     
     append_scale is used to generate an extra anchor whose scale is 
-    \sqrt{scale*append_scale}. Set append_scale=None to disenable this 
+    sqrt{scale*append_scale}. Set append_scale=None to disenable this 
     extra anchor.
     """
     base_anchor = nd.array([1, 1, scale, scale])

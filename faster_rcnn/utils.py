@@ -3,7 +3,7 @@
 
 import mxnet as mx
 from mxnet import nd
-from config import cfg
+from .config import cfg
 import numpy as np 
 import cv2
 

@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
-from config import cfg
+from faster_rcnn.config import cfg
 from VOCDataset import VOCDataset
-from faster_rcnn import FasterRCNN
+from faster_rcnn.faster_rcnn import FasterRCNN
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
-from rpn_gt_opr import rpn_gt_opr
-from rpn_proposal import proposal_train
+from faster_rcnn.utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
+from faster_rcnn.rpn_gt_opr import rpn_gt_opr
+from faster_rcnn.rpn_proposal import proposal_train
 
 def train_transformation(data, label):
     data, label = random_flip(data, label)
@@ -63,7 +63,6 @@ for epoch in range(20):
             rcnn_loss_cls = mx.nd.softmax_cross_entropy(rcnn_cls, rcnn_cls_target) / rcnn_cls.shape[0]
             
             loss = rpn_loss_cls + rpn_loss_reg + rcnn_loss_cls + rcnn_loss_reg
-            from IPython import embed; embed()
 
         loss.backward()
         print("Epoch {} Iter {}: loss={:.4}, rpn_loss_cls={:.4}, rpn_loss_reg={:.4}, rcnn_loss_cls={:.4}, rcnn_loss_reg={:.4}".format(

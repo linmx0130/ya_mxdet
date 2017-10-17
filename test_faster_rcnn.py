@@ -2,13 +2,13 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 import argparse
-from config import cfg
+from faster_rcnn.config import cfg
 from VOCDataset import VOCDataset
-from faster_rcnn import FasterRCNN
+from faster_rcnn.faster_rcnn import FasterRCNN
 import mxnet as mx
-from utils import imagenetNormalize, img_resize, bbox_inverse_transform
-from vis_tool import show_detection_result
-from rpn_proposal import proposal_test
+from faster_rcnn.utils import imagenetNormalize, img_resize, bbox_inverse_transform
+from faster_rcnn.vis_tool import show_detection_result
+from faster_rcnn.rpn_proposal import proposal_test
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Test Faster RCNN")

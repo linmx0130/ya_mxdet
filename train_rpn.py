@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
-from config import cfg
+from faster_rcnn.config import cfg
 from VOCDataset import VOCDataset
-from rpn import RPNBlock
+from faster_rcnn.rpn import RPNBlock
 import mxnet as mx
-from utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
-from rpn_gt_opr import rpn_gt_opr
-from debug_tool import show_anchors
+from faster_rcnn.utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
+from faster_rcnn.rpn_gt_opr import rpn_gt_opr
+from faster_rcnn.vis_tool import show_anchors
 
 def train_transformation(data, label):
     data, label = random_flip(data, label)
