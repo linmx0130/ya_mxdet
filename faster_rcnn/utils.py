@@ -87,11 +87,10 @@ def bbox_overlaps(anchors:mx.nd.NDArray, gt:mx.nd.NDArray):
 
 def bbox_clip(bbox:mx.nd.NDArray, height, width):
     zeros_t = mx.nd.zeros(bbox[:, 0].shape, ctx=bbox.context)
-    print(bbox.shape)
     bbox[:, 0] = mx.nd.maximum(bbox[:, 0], zeros_t) 
     bbox[:, 1] = mx.nd.maximum(bbox[:, 1], zeros_t) 
-    bbox[:, 2] = mx.nd.minimum(bbox[:, 2], zeros_t + width) 
-    bbox[:, 3] = mx.nd.minimum(bbox[:, 3], zeros_t + height) 
+    bbox[:, 2] = mx.nd.minimum(bbox[:, 2], zeros_t + width - 1) 
+    bbox[:, 3] = mx.nd.minimum(bbox[:, 3], zeros_t + height - 1) 
     return bbox
 
 #
