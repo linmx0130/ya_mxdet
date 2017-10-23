@@ -6,7 +6,7 @@ from faster_rcnn.config import cfg
 from VOCDataset import VOCDataset
 from faster_rcnn.faster_rcnn import FasterRCNN
 import mxnet as mx
-from faster_rcnn.utils import imagenetNormalize, img_resize, bbox_inverse_transform
+from faster_rcnn.utils import imagenetNormalize, img_resize, bbox_inverse_transform, bbox_clip
 from faster_rcnn.vis_tool import show_detection_result
 from faster_rcnn.rpn_proposal import proposal_test
 
@@ -50,6 +50,6 @@ for it, (data, label) in enumerate(test_datait):
     rcnn_cls, rcnn_reg = net.rcnn(f)
     rcnn_bbox_pred = mx.nd.zeros(rcnn_reg.shape)
     for i in range(len(test_dataset.voc_class_name)):
-        rcnn_bbox_pred[:, i*4:(i+1)*4] = bbox_inverse_transform(rpn_bbox_pred, rcnn_reg[:, i*4:(i+1)*4])
+        rcnn_bbox_pred[:, i*4:(i+1)*4] = bbox_clip(bbox_inverse_transform(rpn_bbox_pred, rcnn_reg[:, i*4:(i+1)*4]), h, w)
     rcnn_cls = mx.nd.softmax(rcnn_cls)
     show_detection_result(data, label, rcnn_bbox_pred, rcnn_cls, test_dataset.voc_class_name)
