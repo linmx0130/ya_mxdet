@@ -29,6 +29,16 @@ class DetectorHead(mx.gluon.Block):
 
 
 class RPNBlock(mx.gluon.Block):
+    """ RPNBlock: region proposal network block
+
+    Attributes:
+      num_anchors: The number of anchors this RPN should predict.
+      pretrained_model: A pretrained model as the base architecture of this
+                        region proposal network. The default value is VGG16.
+                        You may choose other models in gluon model zoo.
+      feature_name: The name of feature in pretrained model. The name varies
+                    for different models and different stages. 
+    """
     def __init__(self, num_anchors, pretrained_model=mx.gluon.model_zoo.vision.vgg16, feature_name='vgg0_conv12_fwd_output', **kwargs):
         super(RPNBlock, self).__init__(**kwargs)
         self.feature_extractor = None
