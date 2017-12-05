@@ -38,7 +38,6 @@ class RPNBlock(mx.gluon.Block):
     
     def forward(self, data, *args):
         f = self.feature_exactor(data)
-        f = f[0]
         f_cls, f_reg = self.head(f)
         return f_cls, f_reg, f
     

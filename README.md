@@ -8,7 +8,7 @@ implementation **fully in MXNet [gluon](http://gluon.mxnet.io) API**. More funct
 to tune it carefully for your tasks.
 
 ## Dependency
-*ya_mxdet* depends on MXNet 0.11 with GPU support. 
+*ya_mxdet* depends on MXNet 0.12 with GPU support. 
 
  Refer to 
 <https://mxnet.incubator.apache.org/get_started/install.html> for more details.
