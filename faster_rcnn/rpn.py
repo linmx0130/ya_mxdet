@@ -38,6 +38,7 @@ class RPNBlock(mx.gluon.Block):
     
     def forward(self, data, *args):
         f = self.feature_exactor(data)
+        f = f[0]
         f_cls, f_reg = self.head(f)
         return f_cls, f_reg, f
     
@@ -50,7 +51,6 @@ class RPNBlock(mx.gluon.Block):
         feature_list = internals.list_outputs()
         # make sure the feature user want exists
         assert self.feature_name in feature_list
-        feature_requested = [internals[self.feature_name]]
+        feature_requested = internals[self.feature_name]
         self.feature_exactor = mx.gluon.SymbolBlock(feature_requested, input_var, params=feature_model.collect_params())
-
         self.head.init_params(ctx)

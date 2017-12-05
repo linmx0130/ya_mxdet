@@ -31,8 +31,9 @@ trainer = mx.gluon.trainer.Trainer(net.collect_params(),
                                      'momentum': 0.9})
 
 anchors_count = len(cfg.anchor_ratios) * len(cfg.anchor_scales)
+first_iter_saved_toggle = True
 
-for epoch in range(20):
+for epoch in range(1, 21):
     for it, (data, label) in enumerate(train_datait):
         data = data.as_in_context(ctx)
         _n, _c, h, w = data.shape
@@ -70,4 +71,7 @@ for epoch in range(20):
                 rpn_loss_cls.asscalar(), rpn_loss_reg.asscalar(),
                 rcnn_loss_cls.asscalar(), rcnn_loss_reg.asscalar()))
         trainer.step(data.shape[0])
+        if first_iter_saved_toggle:
+            net.collect_params().save(cfg.model_path_pattern.format(0)) 
+            first_iter_saved_toggle = False
     net.collect_params().save(cfg.model_path_pattern.format(epoch)) 
