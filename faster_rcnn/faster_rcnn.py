@@ -28,8 +28,8 @@ class RCNNBlock(mx.gluon.Block):
     def init_by_vgg(self, ctx):
         self.collect_params().initialize(mx.init.Normal(), ctx=ctx)
         vgg16 = mx.gluon.model_zoo.vision.vgg16(pretrained=True)
-        _set_dense_weights(self.fc6, vgg16.classifier[0])
-        _set_dense_weights(self.fc7, vgg16.classifier[2])
+        _set_dense_weights(self.fc6, vgg16.features[31])
+        _set_dense_weights(self.fc7, vgg16.features[33])
 
 
 class FasterRCNN(mx.gluon.Block):
