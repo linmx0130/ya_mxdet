@@ -67,7 +67,7 @@ class VOCDataset(mx.gluon.data.Dataset):
         ret = []
         for obj in gt['objects']:
             if filter_difficult and (obj['difficult']==1):
-                pass
+                continue
             new_array = list(obj['bndbox'])
             new_array.append(self.class_to_id[obj['name']])
             ret.append(new_array)

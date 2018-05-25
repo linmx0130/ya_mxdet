@@ -97,7 +97,7 @@ def bbox_clip(bbox:mx.nd.NDArray, height, width):
 # Data argumentation and normalization
 #
 def random_flip(data, label):
-    if np.random.uniform() > 0.0:
+    if np.random.uniform() > 0.5:
         c, h, w = data.shape
         data = np.flip(data, axis=2)
         x0 = label[:, 0].copy()
