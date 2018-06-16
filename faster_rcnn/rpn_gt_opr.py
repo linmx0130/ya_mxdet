@@ -43,7 +43,7 @@ def rpn_gt_opr(reg_shape, label, ctx, img_h, img_w, return_anchors=False):
     # sample bg if there are too many negative examples
     if (np.sum(bbox_cls_gt_np == 0) > num_bg):
         bg_inds = np.where(bbox_cls_gt_np==0)[0]
-        disable_inds = np.random.choice(bg_inds, size=(len(bg_inds) - num_fg), replace=False)
+        disable_inds = np.random.choice(bg_inds, size=(len(bg_inds) - num_bg), replace=False)
         bbox_cls_gt_np[disable_inds] = -1
 
     bbox_cls_gt = mx.nd.array(bbox_cls_gt_np, bbox_cls_gt.context)
