@@ -13,7 +13,7 @@ def _set_dense_weights(lv: mx.gluon.nn.Dense, rv: mx.gluon.nn.Dense):
 class RCNNBlock(mx.gluon.Block):
     def __init__(self, num_classes, **kwargs):
         super(RCNNBlock, self).__init__(**kwargs)
-        self.fc6 = mx.gluon.nn.Dense(in_units=512*7*7, units=4096, activation='relu')
+        self.fc6 = mx.gluon.nn.Dense(units=4096, activation='relu')
         self.fc7 = mx.gluon.nn.Dense(in_units=4096, units=4096, activation='relu')
         self.cls_fc = mx.gluon.nn.Dense(in_units=4096, units=num_classes, activation=None)
         self.reg_fc = mx.gluon.nn.Dense(in_units=4096, units=num_classes*4, activation=None)
@@ -28,14 +28,14 @@ class RCNNBlock(mx.gluon.Block):
     def init_by_vgg(self, ctx):
         self.collect_params().initialize(mx.init.Normal(), ctx=ctx)
         vgg16 = mx.gluon.model_zoo.vision.vgg16(pretrained=True)
-        _set_dense_weights(self.fc6, vgg16.features[31])
-        _set_dense_weights(self.fc7, vgg16.features[33])
+        # _set_dense_weights(self.fc6, vgg16.features[31])
+        # _set_dense_weights(self.fc7, vgg16.features[33])
 
 
 class FasterRCNN(mx.gluon.Block):
     def __init__(self, num_anchors, num_classes, **kwargs):
-        super(FasterRCNN, self).__init__(**kwargs)
-        self.rpn = RPNBlock(num_anchors)
+        super(FasterRCNN, self).__init__()
+        self.rpn = RPNBlock(num_anchors, pretrained_model=kwargs["pretrained_model"], feature_name=kwargs["feature_name"])
         self.rcnn = RCNNBlock(num_classes)
         
     def forward(self, x, **kwargs):
