@@ -2,8 +2,7 @@
 # Copyright 2017, Mengxiao Lin <linmx0130@gmail.com>
 
 from faster_rcnn.config import cfg
-# from VOCDataset import VOCDataset
-from TUPUFaceDataset import TUPUFaceDataset
+from VOCDataset import VOCDataset
 from faster_rcnn.faster_rcnn import FasterRCNN
 import mxnet as mx
 from faster_rcnn.utils import random_flip, imagenetNormalize, img_resize, random_square_crop, select_class_generator, bbox_inverse_transform, softmax_celoss_with_ignore
@@ -39,16 +38,11 @@ def train_dataset():
     prepare a custom dataset
     return: train_dataset
     '''
-    # train_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
-    #                           img_dir=cfg.img_dir,
-    #                           dataset_index=cfg.dataset_index,
-    #                           transform=train_transformation,
-    #                           resize_func=img_resize)
-    train_dataset = TUPUFaceDataset(
-            cfg.input_json_files,
-            transform=train_transformation,
-            resize_func=img_resize
-            )
+    train_dataset = VOCDataset(annotation_dir=cfg.annotation_dir,
+                              img_dir=cfg.img_dir,
+                              dataset_index=cfg.dataset_index,
+                              transform=train_transformation,
+                              resize_func=img_resize)
     return train_dataset
 
 
