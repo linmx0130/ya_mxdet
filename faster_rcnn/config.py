@@ -77,6 +77,7 @@ class _ConfigVOC2012:
     test_dataset_index='VOC2012/ImageSets/Main/test.txt'
     test_img_dir='VOC2012/JPEGImages/'
 
+
 # Choose a config
 # config for voc 2012
 cfg = _ConfigVOC2012()

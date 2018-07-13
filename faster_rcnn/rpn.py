@@ -6,6 +6,7 @@ RPN: Region Proposal Network
 """
 
 import mxnet as mx
+from gluoncv.model_zoo import model_zoo as models
 
 def setConvWeights(lv: mx.gluon.nn.Conv2D, rv: mx.gluon.nn.Conv2D):
     lv.weight.set_data(rv.weight.data())
@@ -39,7 +40,7 @@ class RPNBlock(mx.gluon.Block):
       feature_name: The name of feature in pretrained model. The name varies
                     for different models and different stages. 
     """
-    def __init__(self, num_anchors, pretrained_model=mx.gluon.model_zoo.vision.vgg16, feature_name='vgg0_conv12_fwd_output', **kwargs):
+    def __init__(self, num_anchors, pretrained_model="vgg16", feature_name='vgg0_conv12_fwd_output', **kwargs):
         super(RPNBlock, self).__init__(**kwargs)
         self.feature_extractor = None
         self.feature_model = pretrained_model
@@ -53,7 +54,7 @@ class RPNBlock(mx.gluon.Block):
     
     def init_params(self, ctx):
         # get feature exactor
-        feature_model = self.feature_model(pretrained=True, ctx=ctx)
+        feature_model = models.get_model(self.feature_model, pretrained=True, ctx=ctx)
         input_var = mx.sym.var('data')
         out_var = feature_model(input_var)
         internals = out_var.get_internals()
