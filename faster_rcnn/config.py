@@ -7,10 +7,10 @@ def generate_ssd_scales(feature_map_count):
 
 class _Config:
     # Dataset config
-    annotation_dir='VOC2007Train/Annotations/'
-    dataset_index='VOC2007Train/ImageSets/Main/trainval.txt'
+    annotation_dir='VOCdevkit/VOC2007Train/Annotations/'
+    dataset_index='VOCdevkit/VOC2007Train/ImageSets/Main/trainval.txt'
     #dataset_index='person.txt'
-    img_dir='VOC2007Train/JPEGImages/'
+    img_dir='VOCdevkit/VOC2007Train/JPEGImages/'
     resize_short_size = 600
     num_classes = 21 # added background
 
@@ -37,16 +37,16 @@ class _Config:
     # RPN Test
     bbox_count_before_nms = 2000
     rpn_nms_thresh = 0.7
-    test_annotation_dir='VOC2007Train/Annotations/'
-    test_dataset_index='VOC2007Train/ImageSets/Main/test.txt'
-    test_img_dir='VOC2007Train/JPEGImages/'
+    test_annotation_dir='VOCdevkit/VOC2007Train/Annotations/'
+    test_dataset_index='VOCdevkit/VOC2007Train/ImageSets/Main/test.txt'
+    test_img_dir='VOCdevkit/VOC2007Train/JPEGImages/'
 
 class _ConfigVOC2012:
     # Dataset config
-    annotation_dir='VOC2012/Annotations'
-    dataset_index='VOC2012/ImageSets/Main/train.txt'
+    annotation_dir='VOCdevkit/VOC2012/Annotations'
+    dataset_index='VOCdevkit/VOC2012/ImageSets/Main/train.txt'
     #dataset_index='person.txt'
-    img_dir='VOC2012/JPEGImages/'
+    img_dir='VOCdevkit/VOC2012/JPEGImages/'
     resize_short_size = 600
     num_classes = 21 # added background
 
@@ -73,9 +73,9 @@ class _ConfigVOC2012:
     # RPN Test
     bbox_count_before_nms = 2000
     rpn_nms_thresh = 0.7
-    test_annotation_dir='VOC2012/Annotations/'
-    test_dataset_index='VOC2012/ImageSets/Main/test.txt'
-    test_img_dir='VOC2012/JPEGImages/'
+    test_annotation_dir='VOCdevkit/VOC2012/Annotations/'
+    test_dataset_index='VOCdevkit/VOC2012/ImageSets/Main/test.txt'
+    test_img_dir='VOCdevkit/VOC2012/JPEGImages/'
 
 
 # Choose a config

@@ -35,7 +35,7 @@ class RCNNBlock(mx.gluon.Block):
 class FasterRCNN(mx.gluon.Block):
     def __init__(self, num_anchors, num_classes, **kwargs):
         super(FasterRCNN, self).__init__()
-        self.rpn = RPNBlock(num_anchors, pretrained_model=kwargs["pretrained_model"], feature_name=kwargs["feature_name"])
+        self.rpn = RPNBlock(num_anchors, feature_name=kwargs["feature_name"])
         self.rcnn = RCNNBlock(num_classes)
         
     def forward(self, x, **kwargs):

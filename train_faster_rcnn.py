@@ -11,7 +11,7 @@ from faster_rcnn.rpn_proposal import proposal_train
 import os
 import argparse
 import logging
-from faster_rcnn_benchmark import *
+# from faster_rcnn_benchmark import *
 
 
 def logging_system():
@@ -24,6 +24,8 @@ def logging_system():
             )
     fh.setFormatter(formatter)
     logger.addHandler(fh)
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
     return logger
 
 
@@ -57,7 +59,6 @@ def main():
     net = FasterRCNN(
             len(cfg.anchor_ratios) * len(cfg.anchor_scales),
             cfg.num_classes,
-            pretrained_model=args.model,
             feature_name=args.feature_name)
     net.init_params(ctx)
     if args.pretrained_model != "":
@@ -115,7 +116,7 @@ def main():
             if it % args.save_interval == 0:
                 save_schema = os.path.split(args.save_path)[1] + "-{}"
                 net.collect_params().save(os.path.join(args.save_path, save_schema.format(it) + ".gluonmodel"))
-                benchmark(net, ctx, os.path.join(args.save_path, save_schema.format(it) + ".benchmark"))
+                # benchmark(net, ctx, os.path.join(args.save_path, save_schema.format(it) + ".benchmark"))
 
 
 if __name__ == "__main__":
@@ -124,16 +125,15 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', default=20, type=int, help='number of epochs')
     parser.add_argument('--gpus', default='0', type=str, help='identify gpus')
     parser.add_argument('--batch_size', '-b', default=1, type=int, help='mini batch')
-    parser.add_argument('--learning_rate', '-lr', default=0.01, type=float, help='initial learning rate')
-    parser.add_argument('--weight_decay', '-wd', default=0.000005, type=float, help='weight decay')
+    parser.add_argument('--learning_rate', '-lr', default=1e-3, type=float, help='initial learning rate')
+    parser.add_argument('--weight_decay', '-wd', default=1e-4, type=float, help='weight decay')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--logger', default='training.log', type=str, help='')
     parser.add_argument('--log_train_freq', default=100, type=int, help='print log')
     parser.add_argument('--root_dir', default='./', type=str, help='path to root path of data')
-    parser.add_argument('--save_path', default='', type=str, help='path to save checkpoint and log')
+    parser.add_argument('--save_path', default='model_dump', type=str, help='path to save checkpoint and log')
     parser.add_argument('--save_interval', default=10000, type=int, help='')
     parser.add_argument('--model', default='vgg16', type=str, help='path to backbone network')
-    parser.add_argument('--pretrained_model', default='', type=str, help='path to pretrained checkpoint')
     parser.add_argument('--feature_name', default='vgg0_conv12_fwd_output', type=str, help='feature to be extracted')
     args = parser.parse_args()
 
