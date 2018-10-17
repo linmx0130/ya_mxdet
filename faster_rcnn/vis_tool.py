@@ -67,5 +67,10 @@ def show_detection_result(data, label, bboxes, cls_scores, class_name_list):
                 bbox = bboxes_pick[i]
                 cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color=(0, 0, 255), thickness=1)
                 cv2.putText(img, "{}: {:.4}".format(class_name_list[cls_id], cur_scores[i]), (int(bbox[0]), int(bbox[3])),0, 0.5,(255, 255, 0))
-    cv2.imshow("Img", img)
-    cv2.waitKey(0)
+    try:
+        cv2.imshow("Img", img)
+        cv2.waitKey(0)
+    except cv2.error:
+        cv2.imwrite("det_result.jpg", img)
+        print("imshow() is not supported! Saved result to det_result.jpg.")
+        input()

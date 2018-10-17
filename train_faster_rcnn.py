@@ -113,9 +113,11 @@ def main():
 
             logger.info("Epoch {} Iter {:>6d}: loss={:>6.5f}, rpn_loss_cls={:>6.5f}, rpn_loss_reg={:>6.5f}, rcnn_loss_cls={:>6.5f}, rcnn_loss_reg={:>6.5f}, lr={:>6.5f}".format(
                     epoch, it, loss.asscalar(), rpn_loss_cls.asscalar(), rpn_loss_reg.asscalar(), rcnn_loss_cls.asscalar(), rcnn_loss_reg.asscalar(), trainer.learning_rate))
-            if it % args.save_interval == 0:
+             
+            net.collect_params().save(os.path.join(args.save_path, "lastest.gluonmodel"))
+            if epoch % args.save_interval == 0:
                 save_schema = os.path.split(args.save_path)[1] + "-{}"
-                net.collect_params().save(os.path.join(args.save_path, save_schema.format(it) + ".gluonmodel"))
+                net.collect_params().save(os.path.join(args.save_path, save_schema.format(epoch) + ".gluonmodel"))
                 # benchmark(net, ctx, os.path.join(args.save_path, save_schema.format(it) + ".benchmark"))
 
 
@@ -132,9 +134,10 @@ if __name__ == "__main__":
     parser.add_argument('--log_train_freq', default=100, type=int, help='print log')
     parser.add_argument('--root_dir', default='./', type=str, help='path to root path of data')
     parser.add_argument('--save_path', default='model_dump', type=str, help='path to save checkpoint and log')
-    parser.add_argument('--save_interval', default=10000, type=int, help='')
+    parser.add_argument('--save_interval', default=4, type=int, help='')
     parser.add_argument('--model', default='vgg16', type=str, help='path to backbone network')
     parser.add_argument('--feature_name', default='vgg0_conv12_fwd_output', type=str, help='feature to be extracted')
+    parser.add_argument('--pretrained_model', default='', type=str, help='load pretrained model from other sources')
     args = parser.parse_args()
 
     if not os.path.isdir(args.save_path):

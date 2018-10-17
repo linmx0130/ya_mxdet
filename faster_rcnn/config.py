@@ -7,10 +7,10 @@ def generate_ssd_scales(feature_map_count):
 
 class _Config:
     # Dataset config
-    annotation_dir='VOCdevkit/VOC2007Train/Annotations/'
-    dataset_index='VOCdevkit/VOC2007Train/ImageSets/Main/trainval.txt'
+    annotation_dir='VOCdevkit/VOC2007/Annotations/'
+    dataset_index='VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'
     #dataset_index='person.txt'
-    img_dir='VOCdevkit/VOC2007Train/JPEGImages/'
+    img_dir='VOCdevkit/VOC2007/JPEGImages/'
     resize_short_size = 600
     num_classes = 21 # added background
 
@@ -32,14 +32,14 @@ class _Config:
     rcnn_test_sample_size = 256
     rcnn_train_fg_fraction = 0.5
     rcnn_nms_thresh = 0.3
-    rcnn_score_thresh = 0.5
+    rcnn_score_thresh = 0.1
 
     # RPN Test
     bbox_count_before_nms = 2000
     rpn_nms_thresh = 0.7
-    test_annotation_dir='VOCdevkit/VOC2007Train/Annotations/'
-    test_dataset_index='VOCdevkit/VOC2007Train/ImageSets/Main/test.txt'
-    test_img_dir='VOCdevkit/VOC2007Train/JPEGImages/'
+    test_annotation_dir='VOCdevkit/VOC2007/Annotations/'
+    test_dataset_index='VOCdevkit/VOC2007/ImageSets/Main/test.txt'
+    test_img_dir='VOCdevkit/VOC2007/JPEGImages/'
 
 class _ConfigVOC2012:
     # Dataset config
@@ -74,12 +74,12 @@ class _ConfigVOC2012:
     bbox_count_before_nms = 2000
     rpn_nms_thresh = 0.7
     test_annotation_dir='VOCdevkit/VOC2012/Annotations/'
-    test_dataset_index='VOCdevkit/VOC2012/ImageSets/Main/test.txt'
+    test_dataset_index='VOCdevkit/VOC2012/ImageSets/Main/val.txt'
     test_img_dir='VOCdevkit/VOC2012/JPEGImages/'
 
 
 # Choose a config
 # config for voc 2012
-cfg = _ConfigVOC2012()
+# cfg = _ConfigVOC2012()
 # config for voc 2007
-# cfg = _Config()
+cfg = _Config()
