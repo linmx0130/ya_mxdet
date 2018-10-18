@@ -11,8 +11,7 @@ from faster_rcnn.rpn_proposal import proposal_train
 import os
 import argparse
 import logging
-# from faster_rcnn_benchmark import *
-
+import time
 
 def logging_system():
     global args
@@ -75,9 +74,11 @@ def main():
                                             'momentum': 0.9
                                         })
     anchors_count = len(cfg.anchor_ratios) * len(cfg.anchor_scales)
-    
+
     for epoch in range(0, args.epochs):
+        last_iter_end_timestamp = time.time()
         for it, (data, label) in enumerate(train_datait):
+            data_loaed_time = time.time()
             data = data.as_in_context(ctx)
             _n, _c, h, w = data.shape
             label = label.as_in_context(ctx).reshape((1, -1, 5))
@@ -113,13 +114,11 @@ def main():
 
             logger.info("Epoch {} Iter {:>6d}: loss={:>6.5f}, rpn_loss_cls={:>6.5f}, rpn_loss_reg={:>6.5f}, rcnn_loss_cls={:>6.5f}, rcnn_loss_reg={:>6.5f}, lr={:>6.5f}".format(
                     epoch, it, loss.asscalar(), rpn_loss_cls.asscalar(), rpn_loss_reg.asscalar(), rcnn_loss_cls.asscalar(), rcnn_loss_reg.asscalar(), trainer.learning_rate))
-             
-            net.collect_params().save(os.path.join(args.save_path, "lastest.gluonmodel"))
-            if epoch % args.save_interval == 0:
-                save_schema = os.path.split(args.save_path)[1] + "-{}"
-                net.collect_params().save(os.path.join(args.save_path, save_schema.format(epoch) + ".gluonmodel"))
-                # benchmark(net, ctx, os.path.join(args.save_path, save_schema.format(it) + ".benchmark"))
-
+            
+        net.collect_params().save(os.path.join(args.save_path, "lastest.gluonmodel"))
+        if epoch % args.save_interval == 0:
+            save_schema = os.path.split(args.save_path)[1] + "-{}"
+            net.collect_params().save(os.path.join(args.save_path, save_schema.format(epoch) + ".gluonmodel"))
 
 if __name__ == "__main__":
     global args, logger
