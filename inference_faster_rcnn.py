@@ -29,7 +29,7 @@ test_dataset = VOCDataset(annotation_dir=cfg.test_annotation_dir,
                            img_dir=cfg.test_img_dir,
                            dataset_index=cfg.test_dataset_index,
                            transform=test_transformation,
-                           resize_func=img_resize)
+                           resize_func=None)
 
 # test_datait = mx.gluon.data.DataLoader(test_dataset, batch_size=1, shuffle=False)
 ctx = mx.gpu(0)
@@ -44,8 +44,12 @@ prograss_bar = tqdm(total=len(test_dataset))
 
 for it, data_id in enumerate(range(len(test_dataset))):
     data, label = test_dataset[data_id]
+    data = data.asnumpy()
+    data = data.transpose(1, 2, 0)
+    data, scale = img_resize(data)
+    data = data.transpose(2, 0, 1)
     data_id = test_dataset.dataset_index[data_id]
-    data = data.as_in_context(ctx)
+    data = mx.nd.array(data, ctx=ctx)
     _c, h, w = data.shape
     data = data.reshape(1, _c, h, w)
     # label = label.as_in_context(ctx)
@@ -72,7 +76,7 @@ for it, data_id in enumerate(range(len(test_dataset))):
         cur_scores, bboxes_pick = nms(cur_scores, bboxes_pick, cfg.rcnn_nms_thresh)
         for i in range(len(cur_scores)):
             if cur_scores[i] >= cfg.rcnn_score_thresh:
-                bbox = bboxes_pick[i]
+                bbox = bboxes_pick[i] / scale
                 bbox_x, bbox_y , bbox_w, bbox_h = int(bbox[0]), int(bbox[1]), int(bbox[2] - bbox[0]), int(bbox[3] - bbox[1])
                 keep_boxes.append({'image_id':  data_id,
                                    'category_id': cls_id, 
@@ -81,5 +85,6 @@ for it, data_id in enumerate(range(len(test_dataset))):
     det_result.extend(keep_boxes)
     prograss_bar.update()
     # show_detection_ddresult(data, label, rcnn_bbox_pred, rcnn_cls, test_dataset.voc_class_na
+prograss_bar.close()
 with open(args.output_file, 'w') as f:
     json.dump(det_result, f)
