@@ -29,10 +29,10 @@ class _Config:
     rcnn_fg_thresh = 0.5
     rcnn_bg_lo_thresh = 0.1
     rcnn_train_sample_size = 256
-    rcnn_test_sample_size = 256
+    rcnn_test_sample_size = 300
     rcnn_train_fg_fraction = 0.5
     rcnn_nms_thresh = 0.3
-    rcnn_score_thresh = 0.1
+    rcnn_score_thresh = 0.001
 
     # RPN Test
     bbox_count_before_nms = 2000

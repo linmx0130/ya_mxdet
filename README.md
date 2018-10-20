@@ -28,12 +28,15 @@ $ mkdir model_dump
 $ python3 train_faster_rcnn.py
 </pre>
 
-## Test the model
-Currently only a visualization tool is finished. You can watch the detection 
-result with 
+## Test the model 
+You can get detection result by:
 <pre>
-$ python3 test_faster_rcnn.py [model file]
+$ python3 inference_faster_rcnn.py [model_file]
 </pre>
+The results are stored in *inference_output.json* by default, which is in 
+the format of [COCO results format](http://cocodataset.org/#format-results).
+
+*voc_ruller.py* is used to calculate mAP metric of PASCAL VOC 2007 on a inference output file.
 
 ## Other issues
 All the code are distributed with a MIT-style license. If you use this repo in your research, it would be nice to cite the original Faster R-CNN paper and add the link of this project into your report.
